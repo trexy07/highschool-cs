@@ -1,5 +1,1 @@
-# my-coding-projects
-my coding projects since 2021
-
-# to-do:
-- sql & db
+# code from cs1-3 during highschool
