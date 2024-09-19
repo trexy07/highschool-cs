@@ -1,18 +1,18 @@
-
 import mido
 from mido import MidiFile
 
 # Define the BPM for the MIDI file
-BPM = 88
+BPM = 126
 
 # Open the MIDI file
-midi_file = MidiFile(R"C:\Users\trevin\Music\Halo_MIDI_Collection\Book 1 MIDI (Halo CE)\12 - MIDI - Halo CE - Halo.mid")
+midi_file = MidiFile(R"C:\Users\trevin\Music\cupid.mid")
+
 
 
 # Initialize a list to store the sequences
 tracks = []
 
-
+#print(dir(midi_file))
 
 # Process each track in the MIDI file
 for track in midi_file.tracks:
@@ -30,17 +30,17 @@ for track in midi_file.tracks:
             # Append the note to the sequences list
             # midi val, velocity,length,start time
             playing.append(  [msg.note,msg.velocity,0,time]  )
-            print(msg.time)
+            #print(msg.time)
         
-        elif msg.type == 'note_on' and  msg.velocity==0:
-            # elif msg.type == 'note_off' or  msg.velocity==0:
+            #elif msg.type == 'note_on' and  msg.velocity==0:
+        elif msg.type == 'note_off':
 
             # Find the corresponding note_on message and calculate the length
             #note_on_msg = next((m for m in reversed(track[:msg.index]) if m.type == 'note_on' and m.note == msg.note), None)
             #if note_on_msg:
             #note_length = (msg.time + note_on_msg.time) * (60 / BPM)
             #note_length=msg.time/480*(120/90)
-
+            
             # Append the note to the sequences list
             # previous
             for note in playing:
@@ -49,10 +49,11 @@ for track in midi_file.tracks:
             
             for note in playing:
                 if note[0]==msg.note:
-                    # print("good note")
+                    
+                    print("good note")
                     found=False
                     for sequence in sequences:
-                        if sequence[0]<=note[3]:
+                        if sequence[0]<=note[3] and not found:
                             found=True
                             # midi val, velocity,length,
 
@@ -65,11 +66,12 @@ for track in midi_file.tracks:
                             print("rem",note)
 
                             playing.remove(note)
-
+                            
                             
                     if not found:
                         sequences.append([time])
                         sequence=sequences[-1]
+                        sequence.append(  (None, 0, time ))
 
                         sequence.append(  (None, 0, note[3]-sequence[0] )) # type: ignore
 
@@ -93,4 +95,8 @@ for track in midi_file.tracks:
 # Print the sequences
 print(tracks)
 
+print("\n\n\n\n\n",midi_file.ticks_per_beat)
 
+with open('output.txt', 'a') as f:
+    f.write(str(tracks))
+    f.write('exit')
