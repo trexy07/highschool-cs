@@ -88,7 +88,7 @@ def perlin(grid,blend=patterns["3x3"],fade=9):
             
             val=grid[y][x]
             for dx,dy in blend:
-                nx,ny=x+dx+1,y+dy+1
+                nx,ny=x+dx+0,y+dy+0
                 if nx>=0 and nx<sizex and ny>=0 and ny<sizey:
                     grid2[ny][nx]+=val
 
@@ -101,6 +101,48 @@ def perlin(grid,blend=patterns["3x3"],fade=9):
             grid2[y][x]/=fade
             # grid2[y][x]*=1.2
     return grid2
+
+def mergePrint(grid1,grid2,buffer=False):
+    string=""
+    for y in range(len(grid1)):
+        for x in range(len(grid1[y])):
+            #ESC[48;2;{r};{g};{b}m
+            if buffer:
+                if grid2[y][x] >0.1:
+                    string+="\033[48;2;%d;%d;%dm" % (
+                            int((grid2[y][x]+1)*127.5),
+                            int((grid2[y][x]+1)*127.5),
+                            int((grid2[y][x]+1)*127.5) ) 
+                else:
+                    string+="\033[48;2;%d;%d;%dm" % (
+                        0,0,     
+                        (grid1[y][x]+1) * 127.5      )
+                string+="  "
+                string+="\033[0m"
+                # string+="\033[48;2;%d;%d;%dm" % (
+                #     int((grid1[y][x]+1)*127.5),
+                #     int((grid1[y][x]+1)*127.5),
+                #     int((grid1[y][x]+1)*127.5) ) 
+                # string+="  "
+                # string+="\033[0m"
+                
+                pass
+            else:
+                if grid2[y][x] >0.1:
+                    print("\033[48;2;%d;%d;%dm" % (
+                            int((grid2[y][x]+1)*127.5),
+                            int((grid2[y][x]+1)*127.5),
+                            int((grid2[y][x]+1)*127.5) ) 
+                            , end = "")
+                else:
+                    print("\033[48;2;%d;%d;%dm" % (0,0,int((grid1[y][x]+1) *127.5)), end="")
+                pass
+        if buffer:
+            string+="\n"
+        else:
+            print()
+    if buffer:
+        return string
 
 
 # fancyPrint(perlin(grid))
@@ -160,13 +202,14 @@ while True:
             # point=max(point,0)
     string2=fancyPrint(windNoise,buffer=True,wet=False)
 
-
+    string3 = mergePrint(wetNoise,windNoise,buffer=True)
 
 
 
     os.system('cls' if os.name == 'nt' else 'clear')
     print(string)
     print(string2)
+    print(string3)
     # print(windNoise)
     # print(WetNoise)
 
