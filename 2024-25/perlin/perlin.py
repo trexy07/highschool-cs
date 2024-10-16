@@ -1,3 +1,7 @@
+# ideas
+# sea floor + ocean surface + clouds(clearish) +wind (layers)
+# fog will avoid the game baords
+
 import math
 import random
 import os
@@ -9,17 +13,19 @@ sizex,sizey=os.get_terminal_size()
 sizex//=2
 print(sizex,sizey)
 
+minumumWind=0.05 # -1 to 1, sets the minum brightness/value of the wind that is shown
+
 
 patterns={
     "3x3":          [(-1,-1),( 0,-1),(1,-1),(-1, 0),(0, 0),(1, 0),(-1, 1),(0, 1),(1, 1)],
     "3x3hollow":    [(-1,-1),( 0,-1),(1,-1),(-1, 0),(1, 0),(-1, 1),(0, 1),(1, 1)],
-    "3x3plus":      [( 0,-1),(-1, 0),(0, 0),( 1, 0),(0, 1)],
+    "3x3+":      [( 0,-1),(-1, 0),(0, 0),( 1, 0),(0, 1)],
     "3x3x":         [(-1,-1),( 1,-1),(0, 0),(-1, 1),(1, 1)],
     "3x3/":          [(-1,-1),( 0, 0),(1, 1)],
     "3x3\\":         [(-1, 1),( 0, 0),(1,-1)],
     "5x5":          [(-2,-2),(-1,-2),(0,-2),( 1,-2),(2,-2),(-2,-1),(-1,-1),(0,-1),(1,-1),(2,-1),(-2,0),(-1,0),(0,0),(1,0),(2,0),(-2,1),(-1,1),(0,1),(1,1),(2,1),(-2,2),(-1,2),(0,2),(1,2),(2,2)],
     "5x5hollow":    [(-2,-2),(-1,-2),(0,-2),( 1,-2),(2,-2),(-2,-1),(2,-1),(-2,0),(2,0),(-2,1),(2,1),(-2,2),(-1,2),(0,2),(1,2),(2,2)],
-    "5x5plus":      [(-1,-2),( 0,-2),(1,-2),(-2,-1),(2,-1),(-2,0),(2,0),(-1,1),(0,1),(1,1)],
+    "5x5+":      [(-1,-2),( 0,-2),(1,-2),(-2,-1),(2,-1),(-2,0),(2,0),(-1,1),(0,1),(1,1)],
     "5x5rounded":   [(-1,-2),( 0,-2),(1,-2),(-2,-1),(-1,-1),( 0,-1),( 1,-1),( 2,-1),(-2, 0),(-1, 0),( 0, 0),( 1, 0),( 2, 0),(-2, 1),(-1, 1),( 0, 1),( 1, 1),( 2, 1),(-1, 2),( 0, 2),( 1, 2)],
 }
 
@@ -45,7 +51,7 @@ def fancyPrint(grid,buffer=False,wet=True):
                         0,0,     
                         (grid[y][x]+1) * 127.5      )
                 else:
-                    if grid[y][x]>0.1:
+                    if grid[y][x]>minumumWind:
                         string+="\033[48;2;%d;%d;%dm" % (
                             int((grid[y][x]+1)*127.5),
                             int((grid[y][x]+1)*127.5),
@@ -108,7 +114,7 @@ def mergePrint(grid1,grid2,buffer=False):
         for x in range(len(grid1[y])):
             #ESC[48;2;{r};{g};{b}m
             if buffer:
-                if grid2[y][x] >0.1:
+                if grid2[y][x] >minumumWind:
                     string+="\033[48;2;%d;%d;%dm" % (
                             int((grid2[y][x]+1)*127.5),
                             int((grid2[y][x]+1)*127.5),
@@ -128,7 +134,7 @@ def mergePrint(grid1,grid2,buffer=False):
                 
                 pass
             else:
-                if grid2[y][x] >0.1:
+                if grid2[y][x] >minumumWind:
                     print("\033[48;2;%d;%d;%dm" % (
                             int((grid2[y][x]+1)*127.5),
                             int((grid2[y][x]+1)*127.5),
@@ -148,7 +154,7 @@ def mergePrint(grid1,grid2,buffer=False):
 # fancyPrint(perlin(grid))
 
 
-def move(grid,wind=(0,0)):
+def translate(grid,wind=(0,0)):
 
     if wind[0]==-1:
         grid.pop(0)
@@ -179,46 +185,45 @@ def move(grid,wind=(0,0)):
     # return grid
 import time
 # import os
-while True:
-# if True:
-    time.sleep(1)
+if __name__ == "__main__":
+    while True:
+    # if True:
+        time.sleep(1)
 
-    move(grid,wind)
-    # print("\n\n\n")
-    # os.system('cls' if os.name == 'nt' else 'clear')
-    # print("\x1b[0;0H", end = "")
-    # print("\033[H")
-
-
-    wetNoise=perlin(grid, patterns["5x5rounded"],fade=36) # wet noise 
-    string=fancyPrint(wetNoise,buffer=True)
-
-    windNoise=perlin(grid, patterns["3x3"],fade=9) # wind noise
-    
-    # for row in windNoise:
-    #     for point in row:
-    #         if point<0:
-    #             point=None
-            # point=max(point,0)
-    string2=fancyPrint(windNoise,buffer=True,wet=False)
-
-    string3 = mergePrint(wetNoise,windNoise,buffer=True)
+        translate(grid,wind)
+        # print("\n\n\n")
+        # os.system('cls' if os.name == 'nt' else 'clear')
+        # print("\x1b[0;0H", end = "")
+        # print("\033[H")
 
 
+        wetNoise=perlin(grid, patterns["5x5rounded"],fade=36) # wet noise 
+        # string=fancyPrint(wetNoise,buffer=True)
 
-    os.system('cls' if os.name == 'nt' else 'clear')
-    print(string)
-    print(string2)
-    print(string3)
-    # print(windNoise)
-    # print(WetNoise)
+        windNoise=perlin(grid, patterns["3x3"],fade=9) # wind noise
+        
+        # for row in windNoise:
+        #     for point in row:
+        #         if point<0:
+        #             point=None
+                # point=max(point,0)
+        # string2=fancyPrint(windNoise,buffer=True,wet=False)
+
+        string3 = mergePrint(wetNoise,windNoise,buffer=True)
 
 
 
+        os.system('cls' if os.name == 'nt' else 'clear')
+        # print(string)
+        # print(string2)
+        print(string3)
+        # print(windNoise)
+        # print(WetNoise)
 
 
-# either move with wind or bounce the colors
 
-# sea floor + ocean surface + clouds(clearish) +wind
-# fog will avoid the game baords
+
+
+
+
 
