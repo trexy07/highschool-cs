@@ -2,7 +2,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class TerminalDimensions {
+public class TerminalSize {
 
     public static int[] getTerminalSize() throws IOException, InterruptedException {
         ProcessBuilder processBuilder = new ProcessBuilder("sh", "-c", "stty size < /dev/tty");

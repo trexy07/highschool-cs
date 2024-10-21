@@ -1,6 +1,6 @@
 import java.util.Random;
-import java.awt.Toolkit;
-import java.awt.Dimension;
+import java.io.IOException;
+
 
 public class perlin {
     private static final double MINIMUM_WIND = 0.1; // -1 to 1, 
@@ -42,23 +42,26 @@ public class perlin {
             }
         };
     
-    private static int SIZEX = 30;
-    private static int SIZEY = 30;
+    // private static int SIZEX = 60/2;
+    // private static int SIZEY = 30;
+    private static int SIZEX = 160/2;
+    private static int SIZEY = 16;
     
-    public static void notmain(String[] args) {
-        // try {
-            System.out.println("test");
-            // System.out.println(SIZEX + " " + SIZEY);
-            // Thread.sleep(1000);
-        // } catch (InterruptedException e) {
-        //     e.printStackTrace();
-        // }
-    }
+
 
     public static void main(String[] args) {
         
 
-        
+        try {
+            int[] terminalSize = TerminalSize.getTerminalSize();
+            SIZEX = terminalSize[1] / 2;
+            SIZEY = terminalSize[0];
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            // Default values if terminal size cannot be determined
+            // SIZEX = 160 / 2;
+            // SIZEY = 16;
+        }
         
 
         System.out.println("test");
@@ -104,7 +107,8 @@ public class perlin {
             // double[][] windNoise = perlin(grid, PATTERNS[0], 9); // wind noise
             double[][] wetNoise = perlin(grid, PATTERNS[6], 36); // wet noise
             double[][] windNoise = perlin(grid, PATTERNS[0], 9); // wind noise
-            // System.out.flush();
+
+            System.out.flush();
             mergePrint(wetNoise, windNoise);
             // System.out.print("\033[H\033[2J");
             // System.out.flush(); // writes all to the screen
