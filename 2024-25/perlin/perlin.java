@@ -108,7 +108,9 @@ public class perlin {
             double[][] wetNoise = perlin(grid, PATTERNS[6], 36); // wet noise
             double[][] windNoise = perlin(grid, PATTERNS[0], 9); // wind noise
 
+            System.out.print("\033[H\033[2J");  
             System.out.flush();
+
             mergePrint(wetNoise, windNoise);
             // System.out.print("\033[H\033[2J");
             // System.out.flush(); // writes all to the screen
@@ -141,6 +143,7 @@ public class perlin {
 
     private static void mergePrint(double[][] grid1, double[][] grid2) {
         for (int y = 0; y < SIZEY; y++) {
+            System.out.println();
             for (int x = 0; x < SIZEX; x++) {
                 if (grid2[y][x] > MINIMUM_WIND) {
                     System.out.print("\033[48;2;" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + "m  \033[0m");
@@ -148,7 +151,7 @@ public class perlin {
                     System.out.print("\033[48;2;0;0;" + (int) ((grid1[y][x] + 1) * 127.5) + "m  \033[0m");
                 }
             }
-            System.out.println();
+            // System.out.println();
         }
     }
 
