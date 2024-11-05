@@ -1,7 +1,7 @@
 
 import java.util.Random;
 import java.io.IOException;
-
+//// fix statics, they are properties of the whole class not just one instance
 public class perlin {
 
     private static final double MINIMUM_WIND = 0.1; // -1 to 1, used to mask the wind
@@ -49,11 +49,11 @@ public class perlin {
     private static int sizeX = 80 / 2;
     private static int sizeY = 24;
 
-    private static int[] mainWind; // how the grid moves
-    private static double[][] mainGrid; // the grid of floats
+    private int[] mainWind; // how the grid moves
+    private double[][] mainGrid; // the grid of floats
 
-    private static double[][] wetNoise; // water noise generated from the grid
-    private static double[][] windNoise; // wind noise generated from the grid
+    private double[][] wetNoise; // water noise generated from the grid
+    private double[][] windNoise; // wind noise generated from the grid
 
     public perlin() { //constructor or __init__ in python
         // constructor
@@ -68,24 +68,24 @@ public class perlin {
         }
 
         //create grid of random floats
-        mainGrid = new double[sizeY + 4][sizeX + 4];
+        this.mainGrid = new double[sizeY + 4][sizeX + 4];
         Random random = new Random();
         for (int y = 0; y < sizeY + 4; y++) {
             for (int x = 0; x < sizeX + 4; x++) {
-                mainGrid[y][x] = random.nextDouble() * 2 - 1;
+                this.mainGrid[y][x] = random.nextDouble() * 2 - 1;
             }
         }
 
         //create random wind
-        mainWind = new int[2];
+        this.mainWind = new int[2];
         Random rand = new Random();
         do {
-            mainWind[0] = rand.nextInt(3) - 1;
-            mainWind[1] = rand.nextInt(3) - 1;
-        } while (mainWind[0] == 0 && mainWind[1] == 0);
+            this.mainWind[0] = rand.nextInt(3) - 1;
+            this.mainWind[1] = rand.nextInt(3) - 1;
+        } while (this.mainWind[0] == 0 && this.mainWind[1] == 0);
 
-        wetNoise = generateNoise(mainGrid, PATTERNS[6], 36); // water noise
-        windNoise = generateNoise(mainGrid, PATTERNS[0], 9); // wind noise
+        this.wetNoise = generateNoise(this.mainGrid, PATTERNS[6], 36); // water noise
+        this.windNoise = generateNoise(this.mainGrid, PATTERNS[0], 9); // wind noise
 
     }
 
@@ -94,16 +94,26 @@ public class perlin {
 
         p.loop();
 
-        /* // test to see if overlay works
+        // test to see if overlay works
+        /*
         String[][] overlay = new String[sizeY][sizeX];
         overlay[5][5] = "💥";
         overlay[5][6] = "💦";
+
+        String introString = "Welcome to battleship";
+        if (introString.length() % 2 != 0){
+            introString += " ";
+        }
+        for (int i=0; i<introString.length()-1; i+=2){
+            overlay[0][i/2] = introString.substring(i, i+2);
+        }
+
         System.out.println(p.render(overlay));
         */
 
     }
 
-    public static void loop() { // default loop that moves the animation and renders it every second
+    public void loop() { // default loop that moves the animation and renders it every second
         while (true) {
             try {
                 Thread.sleep(1000); // wait a second
@@ -112,43 +122,43 @@ public class perlin {
                 // e.printStackTrace();
             }
 
-            translate(mainGrid, mainWind); // move the floats around the grid
+            translate(this.mainGrid, this.mainWind); // move the floats around the grid
 
-            wetNoise = generateNoise(mainGrid, PATTERNS[6], 36); // water noise
-            windNoise = generateNoise(mainGrid, PATTERNS[0], 9); // wind noise
+            this.wetNoise = generateNoise(this.mainGrid, PATTERNS[6], 36); // water noise
+            this.windNoise = generateNoise(this.mainGrid, PATTERNS[0], 9); // wind noise
 
             //clears the screen
             System.out.print("\033[H\033[2J");
             System.out.flush();
 
             // writes to the screen
-            String output = render(wetNoise, windNoise);
+            String output = render(this.wetNoise, this.windNoise);
             System.out.print(output);
         }
 
     }
 
-    public static String nextFrame() { // moves the animation, and returns the render 
+    public String nextFrame() { // moves the animation, and returns the render 
 
-        translate(mainGrid, mainWind); // move the floats around the grid
+        translate(this.mainGrid, this.mainWind); // move the floats around the grid
 
-        wetNoise = generateNoise(mainGrid, PATTERNS[6], 36); // water noise
-        windNoise = generateNoise(mainGrid, PATTERNS[0], 9); // wind noise
+        this.wetNoise = generateNoise(this.mainGrid, PATTERNS[6], 36); // water noise
+        this.windNoise = generateNoise(this.mainGrid, PATTERNS[0], 9); // wind noise
 
         //outputs the rendered frame
-        return render(wetNoise, windNoise);
+        return render(this.wetNoise, this.windNoise);
 
     }
 
-    public static String nextFrame(String[][] overlay) { // moves the animation, and returns the render with an overlay 
+    public String nextFrame(String[][] overlay) { // moves the animation, and returns the render with an overlay 
 
-        translate(mainGrid, mainWind); // move the floats around the grid
+        translate(this.mainGrid, this.mainWind); // move the floats around the grid
 
-        wetNoise = generateNoise(mainGrid, PATTERNS[6], 36); // water noise
-        windNoise = generateNoise(mainGrid, PATTERNS[0], 9); // wind noise
+        this.wetNoise = generateNoise(this.mainGrid, PATTERNS[6], 36); // water noise
+        this.windNoise = generateNoise(this.mainGrid, PATTERNS[0], 9); // wind noise
 
         //outputs the rendered frame
-        return render(wetNoise, windNoise);
+        return render(this.wetNoise, this.windNoise, overlay);
 
     }
 
@@ -176,13 +186,13 @@ public class perlin {
         return grid2;
     }
 
-    public static String render() { //default args for outside rendering 
-        return render(wetNoise, windNoise);
+    public String render() { //default args for outside rendering 
+        return render(this.wetNoise, this.windNoise);
 
     }
 
-    public static String render(String[][] overlay) { //render with text that replaces the wind
-        return render(wetNoise, windNoise, overlay);
+    public String render(String[][] overlay) { //render with text that replaces the wind
+        return render(this.wetNoise, this.windNoise, overlay);
     }
 
     private static String render(double[][] grid1, double[][] grid2) { // layers the bottom and top noise 
@@ -225,7 +235,7 @@ public class perlin {
                         // System.out.print("\033[48;2;0;0;" + (int) ((grid1[y][x] + 1) * 127.5) + "m  \033[0m");
                     }
                 } else {
-                    System.out.println("overlay");
+                    // System.out.println("overlay");
                     output += "\033[48;2;0;0;" + (int) ((grid1[y][x] + 1) * 127.5) + "m" + square + "\033[0m";
                 }
             }
