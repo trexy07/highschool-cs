@@ -37,14 +37,31 @@ import com.sun.jna.ptr.IntByReference;
 */
 public class RawConsoleInput {
 
-   public static void main(String[] args) {
-        try {
-            // Example usage of RawConsoleInput
+   public static void main(String[] args) throws IOException {
+        Thread helloThread = new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(5000);
+                    System.out.println("hello");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        helloThread.setDaemon(true);
+        helloThread.start();
+
+        System.out.println("Press any key to see it printed. Press esc to quit.");
+
+        while (true) {
             int key = RawConsoleInput.read(true);
-            System.out.println("Key pressed: " + key + " = "+ (char) key);
-        } catch (IOException e) {
-            e.printStackTrace();
+            if ( key == 3) {
+                break;
+            }
+            System.out.println("You pressed: " + (char) key);
         }
+ 
     }
 
 private static final boolean           isWindows     = System.getProperty("os.name").startsWith("Windows");

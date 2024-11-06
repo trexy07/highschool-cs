@@ -17,11 +17,11 @@ public class rawTest {
         helloThread.setDaemon(true);
         helloThread.start();
 
-        System.out.println("Press any key to see it printed. Press 'q' to quit.");
+        System.out.println("Press any key to see it printed. Press esc to quit.");
 
         while (true) {
             int key = RawConsoleInput.read(true);
-            if (key == 27 || key == 3) {
+            if ( key == 3) {
                 break;
             }
             System.out.println("You pressed: " + (char) key);

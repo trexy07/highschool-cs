@@ -1,7 +1,14 @@
 
 
 Unicode Block “Enclosed Alphanumerics”
+U+246x
 ①
+
+Halfwidth and Fullwidth Forms (Unicode block) https://en.wikipedia.org/wiki/Halfwidth_and_Fullwidth_Forms_(Unicode_block)
+Fullwidth Latin Capital Letters: U+FF21 to U+FF3A (Ａ to Ｚ)
+Fullwidth Latin Small Letters: U+FF41 to U+FF5A (ａ to ｚ)
+Fullwidth Digits: U+FF10 to U+FF19 (０ to ９)
+
 
 **Unicode Block “Symbols for Legacy Computing”**
 Unicode Block “Block Elements”
