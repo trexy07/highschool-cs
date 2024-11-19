@@ -144,7 +144,7 @@ public class board{
         }
 
         for (int i = 1; i <= 10; i++){
-            // output[i][0] = "\033[38;2;255;215;0m" + ((char) (0x2770 + i+5))+" \033[0m"; //negitives
+            // output[i][0] = "\033[38;2;255;215;0m" + ((char) (0x2770 + i+5))+" \033[0m"; //negatives
             // output[0][i] = ((char) (0x2780 + i-1))+" "; //hollow sans-serif
             output[0][i] = "\033[38;2;255;215;0m" + ((char) (0xff10 + i-1))+"\033[0m"; //double width
         }
@@ -193,8 +193,8 @@ public class board{
 
 
     public void hit(){
-        if (this.board[target[0]][target[1]].substring(1).equals("0")){ // not hit
-            this.board[target[0]][target[1]] =this.board[target[0]][target[1]].substring(0,1)+"1";
+        if (this.board[this.target[0]][this.target[1]].substring(1).equals("0")){ // not hit
+            this.board[this.target[0]][this.target[1]] =this.board[this.target[0]][this.target[1]].substring(0,1)+"1";
         } else{
             //pick random spot
             int x = (int) (Math.random() * 10);
@@ -203,9 +203,15 @@ public class board{
                 x = (int) (Math.random() * 10);
                 y = (int) (Math.random() * 10);
             }
-            System.out.println("Random hit: "+x+" "+y);
+            // System.out.println("Random hit: "+x+" "+y);
+            this.target[0]=y;this.target[1]=x;
             this.board[y][x] =this.board[y][x].substring(0,1)+"1";
         }
+    }
+
+    public static String[][] overlayBoard(int newX, int newY, int startX, int startY, String[][] overlay){
+        String[][] canvas = new String[newY][newX];
+        return overlayBoard(startX, startY, canvas, overlay);
     }
 
     public static String[][] overlayBoard(int startX, int startY, String[][] overlay){
