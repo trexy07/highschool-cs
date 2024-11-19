@@ -55,17 +55,11 @@ public class perlin {
     private double[][] wetNoise; // water noise generated from the grid
     private double[][] windNoise; // wind noise generated from the grid
 
-    public perlin() { //constructor or __init__ in python
+    public perlin(int newX,int newY) { //constructor or __init__ in python
         // constructor
 
-        // get terminal size
-        try {
-            int[] terminalSize = TerminalSize.getTerminalSize(); // import from other file
-            sizeX = terminalSize[1] / 2;
-            sizeY = terminalSize[0];
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        sizeX = newX;
+        sizeY = newY;
 
         //create grid of random floats
         this.mainGrid = new double[sizeY + 4][sizeX + 4];
@@ -89,6 +83,22 @@ public class perlin {
 
     }
 
+    public perlin() { 
+        
+        this(80,24);
+        // get terminal size
+        try {
+            int[] terminalSize = TerminalSize.getTerminalSize(); // import from other file
+            sizeX = terminalSize[1] / 2;
+            sizeY = terminalSize[0];
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        this.sizeX = sizeX;
+        this.sizeY = sizeY;
+        
+
+    }
     public static void main(String[] args) { // if __name__ == "__main__" but in java
         perlin p = new perlin();
 
