@@ -6,11 +6,14 @@ public class battleShip {
 
     private static board p1;
     private static board p2;
-    private static int sizeX = 0;
-    private static int sizeY = 0;
     private static board currentPlayer;
     private static board otherPlayer;
 
+    private static int sizeX = 0;
+    private static int sizeY = 0;
+    private static int lineCount=0;
+    private static String hit_miss="";
+    
     private static boolean moved = false;
 
     public static int CYCLE_DELAY = 50;
@@ -32,13 +35,13 @@ public class battleShip {
         }
 
         if (sizeY <= 11) {
-            System.out.println("Terminal too small " + sizeX + ":" + sizeY);
+            System.out.println("Terminal too small, currently " + sizeX + ":" + sizeY+ "required 44:12");
             return;
         }
 
-        if ("debug" == "debug") {
-            p1 = new board(1, "player1");
-            p2 = new board(2, "player2");
+        if ("no" == "debug") {
+            p1 = new board("player1");
+            p2 = new board("player2");
             currentPlayer = p1;
             otherPlayer = p2;
 
@@ -49,24 +52,28 @@ public class battleShip {
             System.out.println("(input player 1 name)");
 
             String name1 = scan.nextLine(); // Read user input
-            p1 = new board(1, name1);
+            p1 = new board(name1);
             currentPlayer = p1;
 
             System.out.print("\033[H\033[2J");
-            System.out.flush();
+            System.out.flush();            
             System.out.println("\033[32mJapan’s navy under control of General " + name1 + ".");
+            
+            lineCount=0;
             rollingPrint("The battle ships anchor off the coast of Pearl Harbor, Hawaii.\nGeneral... ");
             System.out.println("(input player 2 name)");
 
             String name2 = scan.nextLine(); // Read user input
-            p2 = new board(2, name2);
+            p2 = new board(name2);
             otherPlayer = p2;
 
             System.out.print("\033[H\033[2J");
             System.out.flush();
+
             System.out.println("Japan’s navy under control of General " + name1 + ".");
             System.out.print("The battle ships anchor off the coast of Pearl Harbor, Hawaii.\nGeneral " + name2);
-
+            
+            lineCount=8+name2.length();
             rollingPrint(" sits unassuming of the looming attack on his ships.\nGeneral " +
                 name1 + " has the advantage to attack first.\nThe harbor is fogged over, General " +
                 name1 + " is tasked with picking targets.\n\n-General " +
@@ -79,6 +86,7 @@ public class battleShip {
         Thread backgroundThread = new Thread(() -> {
             int cycleTime = 0;
             boolean turn = true;
+            
 
             String[][] output = p1.printBoard(true);
             // String[][] canvas = board.overlayBoard(       sizeX / 4 - 5, sizeY / 2 - 5, output);
@@ -96,7 +104,7 @@ public class battleShip {
                     if (cycleTime % BLINK_RATE == 0) {
                         turn = !turn;
                     }
-                    String prefix = "\033[H\033[2J\033[32m-General "+currentPlayer.name+ "! Input wasd to select target, then hit enter.";
+                    String prefix = "\033[H\033[2J\033[32m-" + hit_miss + "General " + currentPlayer.name + "! Input wasd to select target, then hit enter.";
                     output = p1.printBoard((p1==currentPlayer) ? turn:false);
                     canvas = board.overlayBoard( sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 5, output);
 
@@ -157,7 +165,7 @@ public class battleShip {
                 currentPlayer.target[1] = Math.min(9, currentPlayer.target[1] + 1);
                 moved = true;
             } else if (key == '\n') {
-                currentPlayer.hit();
+                hit_miss = currentPlayer.hit();
 
                 // switch players
                 board temp = currentPlayer;
@@ -169,8 +177,18 @@ public class battleShip {
     }
 
     public static void rollingPrint(String output, int delay) {
-        for (int i = 0; i < output.length(); i++) {
-            char out = output.charAt(i);
+        int outputLength = output.length();
+        for (int i = 0; i < outputLength; i++) {
+            lineCount++;
+            // System.out.print("\n"+output.indexOf(" ")+','+lineCount);
+            if (lineCount+output.indexOf(" ")>sizeX*2){
+                System.out.println();
+                lineCount=0;
+                // System.out.print("hit");
+
+            }
+            char out = output.charAt(0);
+            output = output.substring(1);
             System.out.print(out);
 
             int time = delay;
