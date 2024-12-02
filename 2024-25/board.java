@@ -22,16 +22,16 @@ public class board{
     */
     private String[][] board;
     
-    public  int owner;
+    // public  int owner;
     public  String name;
     public static int sizeX;
     public static int sizeY;
 
     public int[] target = {0,0};
 
-    public board(int owner, String name){
+    public board(String name){
         //"this" is used to specify the instance variable, if theres a local of the same name
-        this.owner = owner; 
+        // this.owner = owner; 
         this.name = name;
         this.board = new String[10][10];
         for (int i = 0; i < 10; i++){
@@ -49,6 +49,22 @@ public class board{
             e.printStackTrace();
         }
         this.setBoard();
+
+    }
+
+    public board(String name, String locations){ // board constructor for the server to use
+        // this.owner = owner; 
+        this.name = name;
+        this.board = new String[10][10];
+        for (int i = 0; i < 10; i++){
+            for (int j = 0; j < 10; j++){
+                this.board[i][j] = "00";
+            }
+        }
+
+        this.sizeX = 10;
+        this.sizeY = 10;
+        this.setBoard(locations);
 
     }
 
@@ -136,6 +152,57 @@ public class board{
         
     }
 
+    public void setBoard(String locations){
+        // locations
+        // [   "ship type+ x+y+dir"*5     ]
+        // ship type: 1-5
+        // x|y: 0-9
+        // dir: 0-1
+        for(int i = 0;i<5;i++){
+            int type =(locations.charAt(i*4))-'0';
+            int x =(locations.charAt(i*4+1))-'0';
+            int y =(locations.charAt(i*4+2))-'0';
+            int rotation =(locations.charAt(i*4+3))-'0';
+            System.out.println(  String.valueOf(type)+x+y+rotation);
+
+            int length = type + (type<=2?1:0);
+            System.out.println(length);
+
+
+
+            boolean fail = false;
+
+            // check ship placement
+            for (int j = 0; j < length; j++){
+                
+                if (rotation==0){
+                    // System.out.println(board[y][x+j]);
+                    if (board[y][x+j] != "00"){
+                        // System.out.println("fail");
+                        fail = true;
+                        break;
+                    }
+                } else {
+                    // System.out.println(board[y+j][x]);
+                    if (board[y+j][x] != "00"){
+                        // System.out.println("fail");
+                        fail = true;
+                        break;
+                    }
+                }
+                
+            }
+            if (fail){
+                System.out.println("fail");
+                return;
+            }
+
+
+
+
+        }
+    }
+
     public String[][] printBoard(boolean blink){
         String[][] output= new String[11][11];
         for (int i = 1; i <= 10; i++){
@@ -191,15 +258,14 @@ public class board{
         return printBoard(false);
     }
 
-
-    public void hit(){
+    public String hit(){
         if (this.board[this.target[0]][this.target[1]].substring(1).equals("0")){ // not hit
             this.board[this.target[0]][this.target[1]] =this.board[this.target[0]][this.target[1]].substring(0,1)+"1";
         } else{
             //pick random spot
             int x = (int) (Math.random() * 10);
             int y = (int) (Math.random() * 10);
-            while (this.board[y][x].substring(1).equals("1")){ // already hit
+            while (this.board[y][x].charAt(0) =='1'){ // already hit
                 x = (int) (Math.random() * 10);
                 y = (int) (Math.random() * 10);
             }
@@ -207,6 +273,7 @@ public class board{
             this.target[0]=y;this.target[1]=x;
             this.board[y][x] =this.board[y][x].substring(0,1)+"1";
         }
+        return this.board[this.target[0]][this.target[1]].charAt(0) =='0' ? "miss :( " : "hit :) ";
     }
 
     public static String[][] overlayBoard(int newX, int newY, int startX, int startY, String[][] overlay){
@@ -232,10 +299,10 @@ public class board{
 
     public static void main(String[] args){
 
-        
+        // System.out.println("\033[38;2;255;215;0m" +"bonjour "+"\033[0m"); //double width
 
-        board b = new board(1, "Bob");
-        board a = new board(2, "Alice");
+        board b = new board("Bob");
+        board a = new board("Alice");
 
         if (sizeY <= 10){
             System.out.println("Terminal too small "+sizeX+":"+sizeY);
