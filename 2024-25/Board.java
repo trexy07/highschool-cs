@@ -262,14 +262,18 @@ public class Board{
     public String[][] printBoard(){
         return printBoard(false);
     }
-
     public String hit(){
+        hit(this.target[0],this.target[1]);
+    }
+    public String hit(int x, int y){
+        this.target[0]=y;this.target[1]=x;
+
         if (this.board[this.target[0]][this.target[1]].substring(1).equals("0")){ // not hit
             this.board[this.target[0]][this.target[1]] =this.board[this.target[0]][this.target[1]].substring(0,1)+"1";
         } else{
             //pick random spot
-            int x = (int) (Math.random() * 10);
-            int y = (int) (Math.random() * 10);
+            x = (int) (Math.random() * 10);
+            y = (int) (Math.random() * 10);
             while (this.board[y][x].charAt(0) =='1'){ // already hit
                 x = (int) (Math.random() * 10);
                 y = (int) (Math.random() * 10);

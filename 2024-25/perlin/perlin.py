@@ -213,7 +213,7 @@ if __name__ == "__main__":
 
 
 
-        os.system('cls' if os.name == 'nt' else 'clear')
+        os.system(command='cls' if os.name == 'nt' else 'clear')
         # print(string)
         # print(string2)
         print(string3)

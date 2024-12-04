@@ -1,4 +1,4 @@
-import java.io.IOException;
+5import java.io.IOException;
 import java.util.Scanner;
 import input.RawConsoleInput;
 import perlin.*;
