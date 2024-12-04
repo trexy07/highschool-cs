@@ -5,10 +5,10 @@ import perlin.*;
 
 public class Battleship {
 
-    private static board p1;
-    private static board p2;
-    private static board currentPlayer;
-    private static board otherPlayer;
+    private static Board p1;
+    private static Board p2;
+    private static Board currentPlayer;
+    private static Board otherPlayer;
 
     private static int sizeX = 0;
     private static int sizeY = 0;
@@ -41,8 +41,8 @@ public class Battleship {
         }
 
         if ("no" == "debug") {
-            p1 = new board("player1");
-            p2 = new board("player2");
+            p1 = new Board("player1");
+            p2 = new Board("player2");
             currentPlayer = p1;
             otherPlayer = p2;
 
@@ -53,7 +53,7 @@ public class Battleship {
             System.out.println("(input player 1 name)");
 
             String name1 = scan.nextLine(); // Read user input
-            p1 = new board(name1);
+            p1 = new Board(name1);
             currentPlayer = p1;
 
             System.out.print("\033[H\033[2J");
@@ -65,7 +65,7 @@ public class Battleship {
             System.out.println("(input player 2 name)");
 
             String name2 = scan.nextLine(); // Read user input
-            p2 = new board(name2);
+            p2 = new Board(name2);
             otherPlayer = p2;
 
             System.out.print("\033[H\033[2J");
@@ -90,11 +90,11 @@ public class Battleship {
             
 
             String[][] output = p1.printBoard(true);
-            // String[][] canvas = board.overlayBoard(       sizeX / 4 - 5, sizeY / 2 - 5, output);
-            String[][] canvas = board.overlayBoard( sizeX,sizeY-1,  sizeX / 4 - 5, (sizeY-1) / 2 - 5, output);
+            // String[][] canvas = Board.overlayBoard(       sizeX / 4 - 5, sizeY / 2 - 5, output);
+            String[][] canvas = Board.overlayBoard( sizeX,sizeY-1,  sizeX / 4 - 5, (sizeY-1) / 2 - 5, output);
 
             output = p2.printBoard(false);
-            canvas = board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 5, canvas, output);
+            canvas = Board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 5, canvas, output);
 
 
             // String[][] canvas= new String[sizeY][sizeX]; // x and y 
@@ -107,10 +107,10 @@ public class Battleship {
                     }
                     String prefix = "\033[H\033[2J\033[32m-" + hit_miss + "General " + currentPlayer.name + "! Input wasd to select target, then hit enter.";
                     output = p1.printBoard((p1==currentPlayer) ? turn:false);
-                    canvas = board.overlayBoard( sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 5, output);
+                    canvas = Board.overlayBoard( sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 5, output);
 
                     output = p2.printBoard((p2==currentPlayer) ? turn:false);
-                    canvas = board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 5, canvas, output);
+                    canvas = Board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 5, canvas, output);
 
                     if (cycleTime % RENDER_RATE == 0) {
 
@@ -169,7 +169,7 @@ public class Battleship {
                 hit_miss = currentPlayer.hit();
 
                 // switch players
-                board temp = currentPlayer;
+                Board temp = currentPlayer;
                 currentPlayer = otherPlayer;
                 otherPlayer = temp;
 
