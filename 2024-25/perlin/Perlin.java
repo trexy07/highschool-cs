@@ -3,7 +3,7 @@ package perlin;
 import java.util.Random;
 import java.io.IOException;
 //// fix statics, they are properties of the whole class not just one instance
-public class perlin {
+public class Perlin {
 
     private static final double MINIMUM_WIND = 0.1; // -1 to 1, used to mask the wind
 
@@ -56,7 +56,7 @@ public class perlin {
     private double[][] wetNoise; // water noise generated from the grid
     private double[][] windNoise; // wind noise generated from the grid
 
-    public perlin(int newX,int newY) { //constructor or __init__ in python
+    public Perlin(int newX,int newY) { //constructor or __init__ in python
         // constructor receiving size
         this.sizeX = newX;
         this.sizeY = newY;
@@ -64,7 +64,7 @@ public class perlin {
         construct();
     }
 
-    public perlin() { 
+    public Perlin() { 
         // constructor getting size
         try {
             int[] terminalSize = TerminalSize.getTerminalSize(); // import from other file
@@ -102,7 +102,7 @@ public class perlin {
     }
 
     public static void main(String[] args) { // if __name__ == "__main__" but in java
-        perlin p = new perlin();
+        Perlin p = new Perlin();
 
         p.loop();
 

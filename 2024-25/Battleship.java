@@ -3,7 +3,7 @@ import java.util.Scanner;
 import input.RawConsoleInput;
 import perlin.*;
 
-public class battleShip {
+public class Battleship {
 
     private static board p1;
     private static board p2;
@@ -81,7 +81,7 @@ public class battleShip {
                 name1 + "! Input wasd to select target, then hit enter.");
         }
 
-        perlin p = new perlin(sizeX, sizeY-1);
+        Perlin p = new Perlin(sizeX, sizeY-1);
 
 
         Thread backgroundThread = new Thread(() -> {

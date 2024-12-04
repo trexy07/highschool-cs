@@ -1,7 +1,7 @@
 import java.io.IOException;
 import perlin.*;
 
-public class board{
+public class Board{
 
     // each spot is boat/no boat and hit/none
     /*
@@ -30,7 +30,7 @@ public class board{
 
     public int[] target = {0,0};
 
-    public board(String name){
+    public Board(String name){
         //"this" is used to specify the instance variable, if theres a local of the same name
         // this.owner = owner; 
         this.name = name;
@@ -53,7 +53,7 @@ public class board{
 
     }
 
-    public board(String name, String locations){ // board constructor for the server to use
+    public Board(String name, String locations){ // board constructor for the server to use
         // this.owner = owner; 
         this.name = name;
         this.board = new String[10][10];
@@ -306,15 +306,15 @@ public class board{
 
         // System.out.println("\033[38;2;255;215;0m" +"bonjour "+"\033[0m"); //double width
 
-        board b = new board("Bob");
-        board a = new board("Alice");
+        Board b = new Board("Bob");
+        Board a = new Board("Alice");
 
         if (sizeY <= 10){
             System.out.println("Terminal too small "+sizeX+":"+sizeY);
             return;
         }
 
-        perlin p = new perlin();
+        Perlin p = new Perlin();
         
 
         while (true) {
@@ -333,9 +333,6 @@ public class board{
             }
             }
         // p.loop();
-
-
-
 
         // System.out.println(b.board[0][0]); // should fail because board is private
     }
