@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.util.Scanner;
 import input.RawConsoleInput;
+import perlin.*;
 
 public class battleShip {
 

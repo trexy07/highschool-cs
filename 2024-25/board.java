@@ -1,4 +1,5 @@
 import java.io.IOException;
+import perlin.*;
 
 public class board{
 
@@ -23,7 +24,7 @@ public class board{
     private String[][] board;
     
     // public  int owner;
-    public  String name;
+    public String name;
     public static int sizeX;
     public static int sizeY;
 
@@ -66,6 +67,10 @@ public class board{
         this.sizeY = 10;
         this.setBoard(locations);
 
+    }
+
+    public String toString(){
+        return "board("+name+")";
     }
 
     public void setBoard(){
@@ -163,10 +168,10 @@ public class board{
             int x =(locations.charAt(i*4+1))-'0';
             int y =(locations.charAt(i*4+2))-'0';
             int rotation =(locations.charAt(i*4+3))-'0';
-            System.out.println(  String.valueOf(type)+x+y+rotation);
+            // System.out.println(  String.valueOf(type)+x+y+rotation);
 
             int length = type + (type<=2?1:0);
-            System.out.println(length);
+            // System.out.println(length);
 
 
 

@@ -11,7 +11,7 @@
 //
 // Home page: http://www.source-code.biz/snippets/java/RawConsoleInput
 
-// package RawConsoleInput;
+package input;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -289,7 +289,7 @@ private static synchronized void initUnix() throws IOException {
    if (stdinIsConsole) {
       originalTermios = getTerminalAttrs(stdinFd);
       rawTermios = new Termios(originalTermios);
-      rawTermios.c_lflag &= ~(LibcDefs.ICANON | LibcDefs.ECHO | LibcDefs.ECHONL | LibcDefs.ISIG);
+      rawTermios.c_lflag &= ~(LibcDefs.ICANON | LibcDefs.ECHO | LibcDefs.ECHONL | LibcDefs.ISIG );//
       intermediateTermios = new Termios(rawTermios);
       intermediateTermios.c_lflag |= LibcDefs.ICANON;
          // Canonical mode can be switched off between the read() calls, but echo must remain disabled.

@@ -1,3 +1,4 @@
+package perlin;
 
 import java.util.Random;
 import java.io.IOException;
@@ -56,11 +57,29 @@ public class perlin {
     private double[][] windNoise; // wind noise generated from the grid
 
     public perlin(int newX,int newY) { //constructor or __init__ in python
-        // constructor
+        // constructor receiving size
+        this.sizeX = newX;
+        this.sizeY = newY;
 
-        sizeX = newX;
-        sizeY = newY;
+        construct();
+    }
 
+    public perlin() { 
+        // constructor getting size
+        try {
+            int[] terminalSize = TerminalSize.getTerminalSize(); // import from other file
+            sizeX = terminalSize[1] / 2;
+            sizeY = terminalSize[0];
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        this.sizeX = sizeX;
+        this.sizeY = sizeY;
+
+        construct();
+    }
+
+    private void construct(){
         //create grid of random floats
         this.mainGrid = new double[sizeY + 4][sizeX + 4];
         Random random = new Random();
@@ -80,25 +99,8 @@ public class perlin {
 
         this.wetNoise = generateNoise(this.mainGrid, PATTERNS[6], 36); // water noise
         this.windNoise = generateNoise(this.mainGrid, PATTERNS[0], 9); // wind noise
-
     }
 
-    public perlin() { 
-        
-        this(80,24);
-        // get terminal size
-        try {
-            int[] terminalSize = TerminalSize.getTerminalSize(); // import from other file
-            sizeX = terminalSize[1] / 2;
-            sizeY = terminalSize[0];
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        this.sizeX = sizeX;
-        this.sizeY = sizeY;
-        
-
-    }
     public static void main(String[] args) { // if __name__ == "__main__" but in java
         perlin p = new perlin();
 
