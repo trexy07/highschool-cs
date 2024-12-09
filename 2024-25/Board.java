@@ -262,9 +262,11 @@ public class Board{
     public String[][] printBoard(){
         return printBoard(false);
     }
+    
     public String hit(){
-        hit(this.target[0],this.target[1]);
+        return hit(this.target[0],this.target[1]);
     }
+
     public String hit(int x, int y){
         this.target[0]=y;this.target[1]=x;
 
