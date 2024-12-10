@@ -21,7 +21,7 @@ public class Board{
     each square = boat id + hit
 
     */
-    private String[][] board;
+    public String[][] board;
     
     // public  int owner;
     public String name;
@@ -202,7 +202,17 @@ public class Board{
                 return;
             }
 
-
+            // actually place the ship
+            for (int j = 0; j < length; j++){
+                if (rotation==0){
+                    // System.out.println("x: "+(x+j)+" y: "+y);
+                    board[y][x+j] = type+"0";
+                } else {
+                    // System.out.println("x: "+x+" y: "+(y+j));
+                    board[y+j][x] = type+"0";
+                }
+                
+            }
 
 
         }
@@ -284,7 +294,7 @@ public class Board{
             this.target[0]=y;this.target[1]=x;
             this.board[y][x] =this.board[y][x].substring(0,1)+"1";
         }
-        return this.board[this.target[0]][this.target[1]].charAt(0) =='0' ? "miss :( " : "hit :) ";
+        return (this.board[this.target[0]][this.target[1]].charAt(0) =='0' ? "miss :( " : "hit :) "    ) + "at " + (this.target[1]+1) + "," + (this.target[0]+1);
     }
 
     public static String[][] overlayBoard(int newX, int newY, int startX, int startY, String[][] overlay){

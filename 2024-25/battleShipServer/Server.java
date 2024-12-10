@@ -10,32 +10,29 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 public class Server {
-    // private Board p1;// = new Board("player1")
-    // private Board p1;
     
-    // private static List<Object[]> rows;
+    // game data
     private static Map<Integer, Board[]> rows;
     private static Map<Integer, Boolean> turns;
-    private static Map<Integer, String> hits;
-    private static int nextId=0;
+    private static Map<Integer, String > hits;
+
+    // server data
+    private static int                   nextId=0;
 
     public static void main(String[] args) throws Exception {
-        // rows = new ArrayList<>();
-            rows = new HashMap<>();
-            turns = new HashMap<>();
-            hits = new HashMap<>();
-
-
-        // rows.add(new Board[]{ new Board("jeff", "17802230356044905440"),null  });
-
+        // data for each running game
+        rows  = new HashMap<>();
+        turns = new HashMap<>();
+        hits  = new HashMap<>();
         
+        // create the server
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
-        server.createContext("/", new start());
+        server.createContext("/", new Handler());
         server.setExecutor(null); // creates a default executor
         server.start();
     }
     
-    static class start implements HttpHandler {
+    static class Handler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
             String path = t.getRequestURI().getPath();
@@ -65,14 +62,16 @@ public class Server {
                 respond(t,400,"missing argument");
                 return;
             }
-            rows.put( nextId ,new Board[]{ new Board(name,locations),null  });
-            turns.put( nextId ,true);
-            hits.put( nextId ,"");
-            System.out.println(nextId +" joined");
+            rows.put( nextId, new Board[]{ new Board(name,locations),null  });
+            turns.put(nextId, true);
+            hits.put( nextId, "");
+            System.out.println(nextId +" started");
 
+           
+
+            respond(t,200,nextId+"");
+            
             nextId++;
-
-            respond(t,200,"ping");
             return;
         }
 
@@ -83,7 +82,7 @@ public class Server {
             String name      = args.get("name");
             String locations = args.get("locations");
 
-            if (args.get("id")==null || name == null || locations == null){
+            if (args.get("id") == null || name == null || locations == null){
                 respond(t,400,"missing argument");
                 return;
             }
@@ -103,14 +102,18 @@ public class Server {
             return;
         }
 
-        //https://3bxtl7v5-8000.usw3.devtunnels.ms/hit?id=0
+        //https://3bxtl7v5-8000.usw3.devtunnels.ms/hit?id=0&player=T&x=7&y=8
         public void handleHit(HttpExchange t) throws IOException{
             Map<String, String> args = arguments(t);
 
-            if (args.get("id")==null || args.get("player")==null || args.get("x")==null|| args.get("y")==null){
+            if (args.get("id") == null || args.get("player") == null || 
+                args.get("x" ) == null || args.get("y"     ) == null){
                 respond(t,400,"missing argument");
                 return;
-            } else if (args.get("player")!="T" && args.get("player")!="F"){
+            } else if (!(args.get("player").equals("T") || args.get("player").equals("F"))){
+                System.out.print(args.get("player"));
+                System.out.println(args.get("player") == "F"   );
+                
                 respond(t,400,"invalid player");
                 return;
             } else if (args.get("x").length() != 1 || args.get("y").length() != 1 ){ 
@@ -131,7 +134,8 @@ public class Server {
                 respond(t,400,"invalid id, x, or y");
                 return;
             }
-            boolean player = args.get("player") == "T";
+            // System.out.println(id + " " + x + " " + y);
+            boolean player = args.get("player").equals("T");
             
             if        (!rows.containsKey(id))  {
                 respond(t,406,"game not found");
@@ -139,14 +143,27 @@ public class Server {
             } else if (rows.get(id)[1] == null){
                 respond(t,409,"game not filled");
                 return;
-            } else if (turns.get(id) != player)     {
+            } else if (turns.get(id) != player){
                 respond(t,425,"not your turn");
                 return;
             } 
 
             Board[] row = rows.get(id);
-            String  hit = row[1].hit(x,y) + " at " + x + "," + y;
+            
+            // System.out.println(row[player?1:0].name); // enemy name check
+            String  hit = row[player?1:0].hit(x,y); // get the location it hit
+
+            // // debug graphics
+            // for (int i = 0; i<row[player?1:0].board.length; i++){
+            //     for (int j = 0; j<row[player?1:0].board[i].length; j++){
+            //         System.out.print(row[player?1:0].board[i][j]);
+            //     }
+            //     System.out.println();
+            // }
+
+            // store the last hit
             hits.put(id, hit);
+            // change the turn
             turns.put(id, !turns.get(id));
 
             respond(t, 200, hit);
