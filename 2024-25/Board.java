@@ -274,7 +274,7 @@ public class Board{
     }
     
     public String hit(){
-        return hit(this.target[0],this.target[1]);
+        return hit(this.target[1],this.target[0]);
     }
 
     public String hit(int x, int y){
