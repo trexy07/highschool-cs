@@ -116,7 +116,7 @@ private static void shutdownHook() {
 //--- Windows ------------------------------------------------------------------
 
 // The Windows version uses _kbhit() and _getwch() from msvcrt.dll.
-
+                           
 private static Msvcrt        msvcrt;
 private static Kernel32      kernel32;
 private static Pointer       consoleHandle;

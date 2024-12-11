@@ -13,16 +13,16 @@ public class TerminalSize {
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String[] size = reader.readLine().split(" ");
-        int rows = Integer.parseInt(size[0]);
-        int cols = Integer.parseInt(size[1]);
+        int      rows = Integer.parseInt(size[0]);
+        int      cols = Integer.parseInt(size[1]);
 
         return new int[]{rows, cols};
     }
 
     public static void main(String[] args) {
-        try {
+        try                                            {
             int[] size = getTerminalSize();
-            System.out.println("Terminal width: " + size[1]);
+            System.out.println("Terminal width: "  + size[1]);
             System.out.println("Terminal height: " + size[0]);
             // System.out.println(size);
         } catch (IOException | InterruptedException e) {

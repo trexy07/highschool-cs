@@ -21,19 +21,19 @@ public class Board{
     each square = boat id + hit
 
     */
-    public String[][] board;
+    public        String[][] board;
     
     // public  int owner;
-    public String name;
-    public static int sizeX;
-    public static int sizeY;
+    public        String     name;
+    public static int        sizeX;
+    public static int        sizeY;
 
-    public int[] target = {0,0};
+    public        int[]      target = {0,0};
 
     public Board(String name){
         //"this" is used to specify the instance variable, if theres a local of the same name
         // this.owner = owner; 
-        this.name = name;
+        this.name  = name;
         this.board = new String[10][10];
         for (int i = 0; i < 10; i++){
             for (int j = 0; j < 10; j++){
@@ -55,7 +55,7 @@ public class Board{
 
     public Board(String name, String locations){ // board constructor for the server to use
         // this.owner = owner; 
-        this.name = name;
+        this.name  = name;
         this.board = new String[10][10];
         for (int i = 0; i < 10; i++){
             for (int j = 0; j < 10; j++){
@@ -78,7 +78,7 @@ public class Board{
 
         // Random rn = new Random();
 
-        for (int i =5; i>0; i--){
+        for (int i = 5; i>0; i--){
             int length = i;
             if (i<=2)
                 length++;
@@ -119,7 +119,7 @@ public class Board{
                             fail = true;
                             break;
                         }
-                    } else {
+                    } else          {
                         // System.out.println(board[y+j][x]);
                         if (board[y+j][x] != "00"){
                             // System.out.println("fail");
@@ -144,7 +144,7 @@ public class Board{
                     if (rotation==0){
                         // System.out.println("x: "+(x+j)+" y: "+y);
                         board[y][x+j] = i+"0";
-                    } else {
+                    } else          {
                         // System.out.println("x: "+x+" y: "+(y+j));
                         board[y+j][x] = i+"0";
                     }
@@ -163,17 +163,15 @@ public class Board{
         // ship type: 1-5
         // x|y: 0-9
         // dir: 0-1
-        for(int i = 0;i<5;i++){
-            int type =(locations.charAt(i*4))-'0';
-            int x =(locations.charAt(i*4+1))-'0';
-            int y =(locations.charAt(i*4+2))-'0';
-            int rotation =(locations.charAt(i*4+3))-'0';
+        for(int i = 0; i<5; i++){
+            int type     = (locations.charAt(i*4  )) - '0';
+            int x        = (locations.charAt(i*4+1)) - '0';
+            int y        = (locations.charAt(i*4+2)) - '0';
+            int rotation = (locations.charAt(i*4+3)) - '0';
             // System.out.println(  String.valueOf(type)+x+y+rotation);
 
-            int length = type + (type<=2?1:0);
+            int length   = type + (type<=2?1:0);
             // System.out.println(length);
-
-
 
             boolean fail = false;
 
@@ -187,7 +185,7 @@ public class Board{
                         fail = true;
                         break;
                     }
-                } else {
+                } else          {
                     // System.out.println(board[y+j][x]);
                     if (board[y+j][x] != "00"){
                         // System.out.println("fail");
@@ -207,13 +205,12 @@ public class Board{
                 if (rotation==0){
                     // System.out.println("x: "+(x+j)+" y: "+y);
                     board[y][x+j] = type+"0";
-                } else {
+                } else          {
                     // System.out.println("x: "+x+" y: "+(y+j));
                     board[y+j][x] = type+"0";
                 }
                 
             }
-
 
         }
     }
@@ -243,11 +240,11 @@ public class Board{
                     // }
                     output[i][j] = "🎯";
                     // System.out.print("🎯 ");
-                } else if (square.substring(1).equals("0")){ // not hit
+                } else if (square.substring(1).equals("0"))   { // not hit
                     output[i][j] = "  ";
                     // System.out.print("☁️ ");
                     // System.out.print("  ");
-                } else { //hit
+                } else                                        { //hit
                     // output[i][j] = "B";
                     if (square.substring(0,1).equals("0")){ // splash
                         output[i][j] = "💦";
@@ -266,6 +263,7 @@ public class Board{
             }
             // System.out.println();
         }
+
         return output;
     }
 
@@ -294,7 +292,9 @@ public class Board{
             this.target[0]=y;this.target[1]=x;
             this.board[y][x] =this.board[y][x].substring(0,1)+"1";
         }
-        return (this.board[this.target[0]][this.target[1]].charAt(0) =='0' ? "miss :( " : "hit :) "    ) + "at " + (this.target[1]+1) + "," + (this.target[0]+1);
+        return (this.board[this.target[0]][this.target[1]].charAt(0) =='0' ? "miss :( " : "hit :) " ) 
+                + "at " + (this.target[1]+1)
+                + ","   + (this.target[0]+1);
     }
 
     public static String[][] overlayBoard(int newX, int newY, int startX, int startY, String[][] overlay){
@@ -342,10 +342,10 @@ public class Board{
 
             System.out.print(p.nextFrame(canvas));
 
-            try {
-            Thread.sleep(1000); // wait for 1 second
+            try                              {
+                Thread.sleep(1000); // wait for 1 second
             } catch (InterruptedException e) {
-            e.printStackTrace();
+                e.printStackTrace();
             }
             }
         // p.loop();

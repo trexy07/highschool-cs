@@ -5,10 +5,10 @@ import java.io.IOException;
 //// fix statics, they are properties of the whole class not just one instance
 public class Perlin {
 
-    private static final double MINIMUM_WIND = 0.1; // -1 to 1, used to mask the wind
+    private static final double     MINIMUM_WIND = 0.1; // -1 to 1, used to mask the wind
 
     // patterns for generating the noise
-    private static final int[][][] PATTERNS = {
+    private static final int[][][]  PATTERNS = {
         {
             {-1, -1}, {0, -1}, {1, -1}, {-1, 0}, {0, 0}, {1, 0}, {-1, 1}, {0, 1}, {1, 1}
         },
@@ -47,14 +47,14 @@ public class Perlin {
     };
 
     // size of the render, default is an ansi terminal
-    private static int sizeX = 80 / 2;
-    private static int sizeY = 24;
+    private static       int        sizeX = 80 / 2;
+    private static       int        sizeY = 24;
 
-    private int[] mainWind; // how the grid moves
-    private double[][] mainGrid; // the grid of floats
+    private              int[]      mainWind; // how the grid moves
+    private              double[][] mainGrid; // the grid of floats
 
-    private double[][] wetNoise; // water noise generated from the grid
-    private double[][] windNoise; // wind noise generated from the grid
+    private              double[][] wetNoise; // water noise generated from the grid
+    private              double[][] windNoise; // wind noise generated from the grid
 
     public Perlin(int newX,int newY) { //constructor or __init__ in python
         // constructor receiving size

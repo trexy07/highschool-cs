@@ -17,7 +17,7 @@ public class Server {
     private static Map<Integer, String > hits;
 
     // server data
-    private static int                   nextId=0;
+    private static int                   nextId = 0;
 
     public static void main(String[] args) throws Exception {
         // data for each running game
@@ -92,7 +92,7 @@ public class Server {
                 respond(t,406,"game not found");
                 return;
             }
-            if (rows.get(id)[1]!=null){
+            if (rows.get(id)[1] != null){
                 respond(t,409,"game full");
                 return;
             }
@@ -174,7 +174,7 @@ public class Server {
             Map<String, String> args = arguments(t);
 
             // input validation
-            if (args.get("id")==null){
+            if (args.get("id") == null){
                 System.out.println("missing args");
                 respond(t,400,"missing argument");
                 return;
@@ -193,7 +193,7 @@ public class Server {
             Board[] row = rows.get(id);
 
             // calculate the second player's name
-            String name2 = row[1]==null ?"null":row[1].name;
+            String name2 = row[1] == null ? "null" : row[1].name;
             
             // required to return names,turn,last hit position
             String response = row[0].name + "," + name2 + "," + 
@@ -212,7 +212,7 @@ public class Server {
         Map<String, String> args = new HashMap<String, String>();
 
         String[] outputs=query.split("&");
-        for (int i =0 ; i<outputs.length; i++){
+        for (int i = 0; i<outputs.length; i++){
             // System.out.println(outputs[i]);
             String[] split=outputs[i].split("=");
             args.put(split[0], split[1]);

@@ -52,16 +52,10 @@ class ServerTest {
     }
 
     public static String[] sendRequest(String method, String urlString) {
-        String[] result = new String[2];
+        String[]          result     = new String[2];
         HttpURLConnection connection = null;
-        BufferedReader reader = null;
-        // try{
-        //     urlString = URLEncoder.encode(urlString);
-        //     System.out.println(urlString);
-        // }catch(Exception e){
-        //     e.printStackTrace();
-        //     System.exit(1);
-        // }
+        BufferedReader    reader;
+
 
         try {
             // URL url = new URI(urlString).toURL();
@@ -69,7 +63,7 @@ class ServerTest {
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod(method);
 
-            int responseCode = connection.getResponseCode();
+            int responseCode = connection.getResponseCode(); // reciving
             result[0] = String.valueOf(responseCode);
 
 
@@ -86,7 +80,7 @@ class ServerTest {
             }
 
             StringBuilder response = new StringBuilder();
-            String line;
+            String        line;
 
             while ((line = reader.readLine()) != null) {
                 response.append(line);
@@ -99,10 +93,10 @@ class ServerTest {
             // System.out.println(response.toString());
             System.exit(1);
         } finally {
-            if (reader != null) {
-                try {
+            if (reader     != null) {
+                try                     {
                     reader.close();
-                } catch (Exception e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
