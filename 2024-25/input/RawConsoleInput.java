@@ -68,9 +68,9 @@ private static final boolean           isWindows     = System.getProperty("os.na
 private static final int               invalidKey    = 0xFFFE;
 private static final String            invalidKeyStr = String.valueOf((char)invalidKey);
 
-private static boolean                 initDone;
-private static boolean                 stdinIsConsole;
-private static boolean                 consoleModeAltered;
+private static       boolean           initDone;
+private static       boolean           stdinIsConsole;
+private static       boolean           consoleModeAltered;
 
 /**
 * Reads a character from the console without echo.
@@ -83,12 +83,17 @@ private static boolean                 consoleModeAltered;
 *   -1 on EOF.
 *   Otherwise an Unicode character code within the range 0 to 0xFFFF.
 */
-public static int read (boolean wait) throws IOException {
-   if (isWindows) {
-      return readWindows(wait); }
-    else {
-      return readUnix(wait); }}
-
+public static int read (boolean wait) {//throws IOException 
+   try{
+      if (isWindows) {
+         return readWindows(wait); }
+      else {
+         return readUnix(wait); }
+   } catch(Exception e){
+      System.exit(1);
+      return 3;
+   }
+}
 /**
 * Resets console mode to normal line mode with echo.
 *
