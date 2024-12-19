@@ -1,4 +1,4 @@
-package perlin;
+package drawing;
 
 import java.util.Random;
 import java.io.IOException;

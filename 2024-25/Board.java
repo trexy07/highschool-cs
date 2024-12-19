@@ -1,5 +1,6 @@
 import java.io.IOException;
-import perlin.*;
+// import perlin.*;
+import drawing.*;
 
 public class Board{
 
