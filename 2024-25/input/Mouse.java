@@ -6,11 +6,17 @@ import input.RawConsoleInput;
 
 public class Mouse {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException {        
+        
+        for (String arg : args) {
+            if arg.equlas("mouse"){
+                System.out.println("Mouse input flag");
+            }
+        }
 
-        // Print all arguments
-        
-        
+
+
+
         // Enable mouse reporting in SGR mode
         System.out.print("\033[?1000h"); // Enable mouse tracking
         System.out.print("\033[?1006h"); // Enable SGR extended mouse mode

@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 
 class ServerTest {
     public static void main(String[] args) {
-        try {
+        try                  {
             Server.main(args);
             Thread.sleep(1000);
         }catch (Exception e) {
@@ -47,6 +47,7 @@ class ServerTest {
 
         System.exit(0);
     }
+    
     public static String[] sendRequest(String urlString) {
         return sendRequest("GET", urlString);
     }
