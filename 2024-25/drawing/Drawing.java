@@ -33,15 +33,29 @@ public class Drawing{
     public static void main(String[] args){
         // overlay(20, 20, 5, 5, stripes(20, 20, 2));
         // overlay(20, 20, 5, 5, circle(5));
-        circle(5);
+        // circle(5);
+        // circle(4,5);
         // pickQuarter(0, 0, 3);
-        // stripes(20, 20, 2);
+        // stripes(10, 10, 2, -Math.PI/6);
+        // stripes(10, 10, 2, -Math.PI/4);
+        // stripes(10, 10, 4, -Math.PI/3);
+
+        // BiFunction<Double,Double, Boolean> foo =(x2,y2) -> (Math.tan(-Math.PI/4)*x2+y2+2)%(2*2)<=2;
+
+        // System.out.println(foo.apply(7.0,0.0));
+        // System.out.println(Math.tan(-Math.PI/4)*7);
+        // System.out.println(Math.tan(-Math.PI/4)*7+0.0+2);
+
+        // System.out.println((Math.tan(-Math.PI/4)*7+0.0+2) % (2*2)  );
+        // System.out.println(-5%4);
+        stripes(10, 10, 4, -Math.PI/3);
         // checkGrid(
         //     20, 
         //     20, 
         //     (x2,y2) -> (Math.tan(-Math.PI/4)*x2+y2+20)%(2*2)<=2, 
         //     (x2,y2) -> (Math.tan(-Math.PI/4)*x2+y2+20)%(2*2)<=2+1
         // );
+
         
     }
 
@@ -119,30 +133,7 @@ public class Drawing{
 
     // given a size, checks each square for a condition, then precisely check sub squares
     public static String[][] checkGrid(int width, int height, BiFunction<Double,Double, Boolean> precise, BiFunction<Double,Double, Boolean> broad){
-        String[][] grid = new String[height][width];
-
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-
-                if (broad.apply((double)x, (double)y)){
-                    // System.out.print("██");
-                    grid[y][x] = pickQuarter(x, y, precise);
-
-                } else {
-                    // System.out.print("  ");
-                    grid[y][x] = "  ";
-                }
-                // stripes[i][j] = j % stripeWidth == 0 ? "x" : " ";
-                // stripes[i][j] = j % stripeWidth == 0 ? "▚" : " ";
-                // stripes[y][x] = (Math.tan(angle)*x+y+height)%(2*stripeWidth)<stripeWidth ? "██" : "  ";
-                // stripes[y][x] = (Math.tan(angle)*x+y+height)%(2*stripeWidth)<=stripeWidth+1 ? pickQuarter(x,y, (x2,y2) -> (Math.tan(angle)*x2+y2+height)%(2*stripeWidth)<stripeWidth    ) : "  ";
-
-                System.out.print(grid[y][x]);
-            }
-            System.out.println();
-        }
-        return grid;
+        return checkGrid(0, 0, width, height, precise, broad);
     }
 
     // given a size and offset, checks each square for a condition, checks sub squares
@@ -160,8 +151,9 @@ public class Drawing{
 
                 if (broad.apply((double)x, (double)y)){
                     grid[y -(int)startY][x -(int)startX] = pickQuarter(x, y, precise);
-
+                    // System.out.println("hit@"+x+","+y);
                 } else {
+                    // grid[y -(int)startY][x -(int)startX] = "Xx";
                     grid[y -(int)startY][x -(int)startX] = "  ";
                 }
 
@@ -171,6 +163,7 @@ public class Drawing{
         }
         return grid;
     }
+
     
     // given radius, makes circle out of text
     public static String[][] circle(double radius){
@@ -181,6 +174,18 @@ public class Drawing{
             (int) (2*radius)+1, 
             (x2,y2) -> Math.pow(x2, 2) + Math.pow(y2, 2) <= Math.pow(radius, 2)+radiusOffset,
             (x2,y2) -> Math.pow(x2, 2) + Math.pow(y2, 2) <= Math.pow(radius, 2)+1
+        );
+    }
+
+    // given interior and exterior radius, makes circle outline out of text
+    public static String[][] circle(double min,double max){
+        return checkGrid(
+            -(int)max,
+            -(int)max,
+            (int) (2*max)+1, 
+            (int) (2*max)+1, 
+            (x2,y2) -> Math.abs(Math.pow(x2, 2) + Math.pow(y2, 2) - (Math.pow(min, 2) + Math.pow(max, 2))/2 ) <= (Math.pow(max, 2) - Math.pow(min, 2))/2 + radiusOffset,
+            (x2,y2) -> Math.abs(Math.pow(x2, 2) + Math.pow(y2, 2) - (Math.pow(min, 2) + Math.pow(max, 2))/2 ) <= (Math.pow(max, 2) - Math.pow(min, 2))/2 + 1
         );
     }
 
@@ -196,12 +201,14 @@ public class Drawing{
     }
 
     // given size, stripe width, and angle, makes angled stripes out of text
-    public static String[][] stripes(int width, int height, int stripeWidth,double angle){
+    public static String[][] stripes(int width, int height, int stripeWidth, double angle){
         return checkGrid(
             width, height, 
-            (x2,y2) -> (Math.tan(angle)*x2+y2+height)%(2*stripeWidth)<=stripeWidth,
-            (x2,y2) -> (Math.tan(angle)*x2+y2+height)%(2*stripeWidth)<=stripeWidth+1
+            (x2,y2) -> ((Math.tan(angle)*x2+y2+height  )%(2*stripeWidth)+(2*stripeWidth))%(2*stripeWidth) < stripeWidth,
+            (x2,y2) -> ((Math.tan(angle)*x2+y2+height+1)%(2*stripeWidth)+(2*stripeWidth))%(2*stripeWidth) < stripeWidth+2
         );
+        // in normal algebra this function would be tan(-pi/4)*x+y+ width modulo 2*width < width, 
+        // but java uses remainder instead of modulo, so an extra remainder is added
     }
 
     
