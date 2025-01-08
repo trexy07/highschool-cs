@@ -3,6 +3,8 @@ package drawing;
 import java.util.Map;
 import java.util.HashMap;
 
+import java.io.IOException;
+
 // import java.util.function.Predicate;
 import java.util.function.BiFunction;
 
@@ -29,6 +31,8 @@ public class Drawing{
             Map.entry(1011, "▙")
     ));
     static final double radiusOffset = -.25;
+    static final BiFunction<Double,Double, Double> mod = (a,b) -> (a-b*Math.floor(a/b));
+
 
     public static void main(String[] args){
         // overlay(20, 20, 5, 5, stripes(20, 20, 2));
@@ -37,8 +41,27 @@ public class Drawing{
         // circle(4,5);
         // pickQuarter(0, 0, 3);
         // stripes(10, 10, 2, -Math.PI/6);
-        // stripes(10, 10, 2, -Math.PI/4);
+        stripes(10, 10, 2, -Math.PI/4);
+  
         // stripes(10, 10, 4, -Math.PI/3);
+        // stripes(20, 20, 4, -Math.PI/1.9999999999);
+        // BiFunction<Double,Double, String> test = (x,y) -> ("test");
+        // BiFunction<Double,Integer, String> test2=(x,y) -> ("test");
+        // BiFunction<Double,Double, String> test = test2;
+
+        // System.out.println(-5%2 );
+
+        // System.out.println(-5%-2 );
+        // System.out.println(5%-2 );
+
+        // System.out.println(5%2 );
+        // System.out.println(5 );
+
+        // System.out.println(mod.apply(5.0,2.0 ));
+        // System.out.println(mod.apply(-5.0,2.0 ));
+        // System.out.println(Math.PI+"");
+
+        // System.out.println(Math.tan(Math.PI/2.0)); // should be pos-inf
 
         // BiFunction<Double,Double, Boolean> foo =(x2,y2) -> (Math.tan(-Math.PI/4)*x2+y2+2)%(2*2)<=2;
 
@@ -48,7 +71,6 @@ public class Drawing{
 
         // System.out.println((Math.tan(-Math.PI/4)*7+0.0+2) % (2*2)  );
         // System.out.println(-5%4);
-        stripes(10, 10, 4, -Math.PI/3);
         // checkGrid(
         //     20, 
         //     20, 
@@ -66,22 +88,79 @@ public class Drawing{
     }
 
     // assumes canvas size is the terminal size
-    // public static String[][] overlay(int startX, int startY, String[][] overlay){
-    //     String[][] canvas = new String[sizeY][sizeX];
-    //     return overlay(startX, startY, canvas, overlay);
-    // }
+    public static String[][] overlay(int startX, int startY, String[][] overlay){
+        try {
+            int[]      terminalSize = TerminalSize.getTerminalSize(); // import from other file
+            String[][] canvas       = new String[terminalSize[0]][terminalSize[1] / 2];
+            return overlay(startX, startY, canvas, overlay);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            String[][] canvas       = new String[80][40];
+            return overlay(startX, startY, canvas, overlay);
+        }
+    }
+
+    public static String[][] overlay(int startX, int startY, String color, String[][] overlay){
+        try {
+            int[]      terminalSize = TerminalSize.getTerminalSize(); // import from other file
+            String[][] canvas       = new String[terminalSize[0]][terminalSize[1] / 2];
+            return overlay(startX, startY, color, canvas, overlay);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            String[][] canvas       = new String[80][40];
+            return overlay(startX, startY, color, canvas, overlay);
+        }
+    }
 
     // overlays the overlay onto an existing canvas
     public static String[][] overlay(int startX, int startY, String[][] canvas, String[][] overlay){
+        return overlay(startX, startY, "", canvas, overlay);
+    }
+
+    public static String[][] overlay(int startX, int startY, String color, String[][] canvas, String[][] overlay){
         for (int i = 0; i < overlay.length; i++) {
             for (int j = 0; j < overlay[i].length; j++) {
                 if (overlay[i][j] != null) {
-                    canvas[startY + i][startX + j] = overlay[i][j];
+                    canvas[startY + i][startX + j] = color+overlay[i][j];
                 }
             }
         }
         return canvas;
     }
+
+    public static String[][] colorize(String[][] canvas, String color){
+        for (int y = 0; y < canvas.length; y++) {
+            for (int x = 0; x < canvas[y].length; x++) {
+                if (canvas[y][x] != null) {
+                    canvas[y][x] = color+canvas[y][x];
+                }
+            }
+        }
+        return canvas;
+    }
+
+    public static String[][] colorize(String[][] canvas, BiFunction<Double,Integer, String> condition){
+        for (int y = 0; y < canvas.length; y++) {
+            for (int x = 0; x < canvas[y].length; x++) {
+                if (canvas[y][x] != null) {
+                    // for (i=-.25;i<=.25;i+=.5){}
+                    String result="";
+                    for (int i=-1;i<=1;i+=2){
+                        result += condition.apply(x+i*.25,y);
+                        result += canvas[y][x].substring(i,i+1);
+                        result += "\033[0m";
+                    }
+
+
+                    canvas[y][x] = result;
+                }
+                    
+
+            }
+        }
+        return canvas;
+    }
+
 
 
     // divides each square of 2 chars into 2x 4 quarters
@@ -196,21 +275,27 @@ public class Drawing{
     }
 
     // given size and stripe width, makes 45° stripes out of text
-    public static String[][] stripes(int width, int height, int stripeWidth){
+    public static String[][] stripes(int width, int height, double stripeWidth){
         return stripes(width, height, stripeWidth, -Math.PI/4);
     }
 
     // given size, stripe width, and angle, makes angled stripes out of text
-    public static String[][] stripes(int width, int height, int stripeWidth, double angle){
-        return checkGrid(
-            width, height, 
-            (x2,y2) -> ((Math.tan(angle)*x2+y2+height  )%(2*stripeWidth)+(2*stripeWidth))%(2*stripeWidth) < stripeWidth,
-            (x2,y2) -> ((Math.tan(angle)*x2+y2+height+1)%(2*stripeWidth)+(2*stripeWidth))%(2*stripeWidth) < stripeWidth+2
-        );
-        // in normal algebra this function would be tan(-pi/4)*x+y+ width modulo 2*width < width, 
-        // but java uses remainder instead of modulo, so an extra remainder is added
+    public static String[][] stripes(int width, int height, double stripeWidth, double angle){
+        return stripes(width, height, stripeWidth, stripeWidth, angle);
     }
 
+    // given size, stripe sizes, and angle, makes angled stripes out of text
+    public static String[][] stripes(int width, int height,double gapWidth, double stripeWidth, double angle){
+        double mx = Math.cos(angle);
+        double my = Math.sin(angle);
+        return checkGrid(
+            width, height, 
+            (x2,y2) -> mod.apply(my*x2+mx*y2+height  ,gapWidth+stripeWidth) < stripeWidth,
+            (x2,y2) -> mod.apply(my*x2+mx*y2+height+1,gapWidth+stripeWidth) < stripeWidth+2         
+        );
+        // in normal algebra this function would be tan(-pi/4)*x+y+ width modulo 2*width < width, 
+        // but java uses remainder instead of modulo, so a replacement function was added
+    }
     
     
 
