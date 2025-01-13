@@ -32,6 +32,7 @@ public class Drawing{
     ));
     static final double radiusOffset = -.25;
     static final BiFunction<Double,Double, Double> mod = (a,b) -> (a-b*Math.floor(a/b));
+    // static final BiFunction<Int,Int, Double> mod = (a,b) -> (a-b*Math.floor(a/b));
 
 
     public static void main(String[] args){
@@ -41,8 +42,20 @@ public class Drawing{
         // circle(4,5);
         // pickQuarter(0, 0, 3);
         // stripes(10, 10, 2, -Math.PI/6);
-        stripes(10, 10, 2, -Math.PI/4);
-  
+        // String[][] canvas = stripes(6, 1, 2, -Math.PI/4);
+        String[][] canvas = fill(4, 2);
+        
+        
+
+        String[][] canvas2 = colorize(canvas, "\033[31m");
+
+        String[][] canvas3 = colorize(canvas2, (x,y) -> ((mod.apply((double)x,2.0)<1) ? "\033[35m":""   ));
+
+        
+
+        // String[][] canvas4 = colorize(canvas3, (x,y) -> (y%2<1) ? "\033[33m":""   );
+
+
         // stripes(10, 10, 4, -Math.PI/3);
         // stripes(20, 20, 4, -Math.PI/1.9999999999);
         // BiFunction<Double,Double, String> test = (x,y) -> ("test");
@@ -131,10 +144,20 @@ public class Drawing{
     public static String[][] colorize(String[][] canvas, String color){
         for (int y = 0; y < canvas.length; y++) {
             for (int x = 0; x < canvas[y].length; x++) {
-                if (canvas[y][x] != null) {
-                    canvas[y][x] = color+canvas[y][x];
+                String block = canvas[y][x];
+                if (block != null) {
+                    while (block.indexOf("\033[")!=-1){
+
+                        block =  block.substring(0, block.indexOf("\033[")  )
+                              +  block.substring(   block.indexOf("m"    )+1);
+                    }
+                    canvas[y][x] = color+block.substring(0,1)+"\033[0m" + color + block.substring(1)+"\033[0m";
+
+                    // canvas[y][x] = color+canvas[y][x]+"\033[0m";
+                    System.out.print(canvas[y][x]);
                 }
             }
+            System.out.println();
         }
         return canvas;
     }
@@ -142,21 +165,45 @@ public class Drawing{
     public static String[][] colorize(String[][] canvas, BiFunction<Double,Integer, String> condition){
         for (int y = 0; y < canvas.length; y++) {
             for (int x = 0; x < canvas[y].length; x++) {
-                if (canvas[y][x] != null) {
-                    // for (i=-.25;i<=.25;i+=.5){}
-                    String result="";
+                String block = canvas[y][x];
+                String result = "";
+                if (block != null){
                     for (int i=-1;i<=1;i+=2){
-                        result += condition.apply(x+i*.25,y);
-                        result += canvas[y][x].substring(i,i+1);
-                        result += "\033[0m";
+                        // while (block.indexOf("\033[")!=-1){
+                        String old = "";
+                        if (block.indexOf("\033[")!=-1){
+                            old   = block.substring(0,block.indexOf("m")+1  );
+                            block = block.substring(block.indexOf("m")+1  );
+                            // System.out.println("case1");
+                            // System.out.print(old);
+                            // System.out.println("\033[0m");
+                            // System.out.println(block);
+
+                        } else {
+                            // System.out.println("case2");
+                            old = "\033[0m";
+                        }
+                        
+                        //       +  block.substring(   block.indexOf("m"    )+1);
+                        String color = condition.apply(x + i*.25, y);
+                        // if (result == null){
+                        if (color==""){
+                            result += old;
+                            // result += block.substing;
+                        } else {
+                            result += color;
+                            // result = result + chblock;
+                        }
+                        result += block.substring(0,1)+ "\033[0m";
+                        block = block.substring(block.indexOf("m")+1);
                     }
-
-
-                    canvas[y][x] = result;
-                }
                     
-
+                
+                }
+                canvas[y][x] = result;
+                System.out.print(result);
             }
+            System.out.println();
         }
         return canvas;
     }
@@ -243,6 +290,13 @@ public class Drawing{
         return grid;
     }
 
+    public static String[][] fill(double width, double height){
+        return checkGrid(
+            (int) Math.ceil(width), (int) Math.ceil(height), 
+            (x2,y2) -> (x2<width-.5) && (y2<height-.5),
+            (x2,y2) -> true
+        );
+    }
     
     // given radius, makes circle out of text
     public static String[][] circle(double radius){
