@@ -43,55 +43,31 @@ public class Drawing{
         // pickQuarter(0, 0, 3);
         // stripes(10, 10, 2, -Math.PI/6);
         // String[][] canvas = stripes(6, 1, 2, -Math.PI/4);
-        String[][] canvas = fill(4, 2);
+        // String[][] canvas = fill(4, 2);
         
         
-
-        String[][] canvas2 = colorize(canvas, "\033[31m");
-
-        String[][] canvas3 = colorize(canvas2, (x,y) -> ((mod.apply((double)x,2.0)<1) ? "\033[35m":""   ));
-
-        
-
-        // String[][] canvas4 = colorize(canvas3, (x,y) -> (y%2<1) ? "\033[33m":""   );
+        String[][] canvas = stripes(6, 6, 2, -Math.PI/4);
+        canvas = colorize(canvas, "\033[33;40m");
+        String[][] canvas2 = fill(10, 10);
+        canvas2 = colorize(canvas2, "\033[31m");
+        String[][] canvas3 = overlay(0, 0, canvas2, canvas);
+        print(canvas3);
 
 
-        // stripes(10, 10, 4, -Math.PI/3);
-        // stripes(20, 20, 4, -Math.PI/1.9999999999);
-        // BiFunction<Double,Double, String> test = (x,y) -> ("test");
-        // BiFunction<Double,Integer, String> test2=(x,y) -> ("test");
-        // BiFunction<Double,Double, String> test = test2;
-
-        // System.out.println(-5%2 );
-
-        // System.out.println(-5%-2 );
-        // System.out.println(5%-2 );
-
-        // System.out.println(5%2 );
-        // System.out.println(5 );
-
-        // System.out.println(mod.apply(5.0,2.0 ));
-        // System.out.println(mod.apply(-5.0,2.0 ));
-        // System.out.println(Math.PI+"");
-
-        // System.out.println(Math.tan(Math.PI/2.0)); // should be pos-inf
-
-        // BiFunction<Double,Double, Boolean> foo =(x2,y2) -> (Math.tan(-Math.PI/4)*x2+y2+2)%(2*2)<=2;
-
-        // System.out.println(foo.apply(7.0,0.0));
-        // System.out.println(Math.tan(-Math.PI/4)*7);
-        // System.out.println(Math.tan(-Math.PI/4)*7+0.0+2);
-
-        // System.out.println((Math.tan(-Math.PI/4)*7+0.0+2) % (2*2)  );
-        // System.out.println(-5%4);
-        // checkGrid(
-        //     20, 
-        //     20, 
-        //     (x2,y2) -> (Math.tan(-Math.PI/4)*x2+y2+20)%(2*2)<=2, 
-        //     (x2,y2) -> (Math.tan(-Math.PI/4)*x2+y2+20)%(2*2)<=2+1
-        // );
+        // String[][] canvas3 = colorize(canvas2, (x,y) -> ((mod.apply((double)x,2.0)<1) ? "\033[35m":""   ));
 
         
+
+        
+    }
+
+    public static void print(String[][] output){
+        for (int y = 0; y < output.length; y++) {
+            for (int x = 0; x < output[y].length; x++) {
+                System.out.print(output[y][x]);
+            }
+            System.out.println();
+        }
     }
 
     // makes a new canvas of null strings and overlays the overlay
@@ -113,33 +89,42 @@ public class Drawing{
         }
     }
 
-    public static String[][] overlay(int startX, int startY, String color, String[][] overlay){
-        try {
-            int[]      terminalSize = TerminalSize.getTerminalSize(); // import from other file
-            String[][] canvas       = new String[terminalSize[0]][terminalSize[1] / 2];
-            return overlay(startX, startY, color, canvas, overlay);
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-            String[][] canvas       = new String[80][40];
-            return overlay(startX, startY, color, canvas, overlay);
-        }
-    }
+    // public static String[][] overlay(int startX, int startY, String color, String[][] overlay){
+    //     try {
+    //         int[]      terminalSize = TerminalSize.getTerminalSize(); // import from other file
+    //         String[][] canvas       = new String[terminalSize[0]][terminalSize[1] / 2];
+    //         return overlay(startX, startY, color, canvas, overlay);
+    //     } catch (IOException | InterruptedException e) {
+    //         e.printStackTrace();
+    //         String[][] canvas       = new String[80][40];
+    //         return overlay(startX, startY, color, canvas, overlay);
+    //     }
+    // }
 
     // overlays the overlay onto an existing canvas
     public static String[][] overlay(int startX, int startY, String[][] canvas, String[][] overlay){
-        return overlay(startX, startY, "", canvas, overlay);
-    }
-
-    public static String[][] overlay(int startX, int startY, String color, String[][] canvas, String[][] overlay){
+        // return overlay(startX, startY, "", canvas, overlay);
         for (int i = 0; i < overlay.length; i++) {
             for (int j = 0; j < overlay[i].length; j++) {
                 if (overlay[i][j] != null) {
-                    canvas[startY + i][startX + j] = color+overlay[i][j];
+                    canvas[startY + i][startX + j] = overlay[i][j];
+                    
                 }
             }
         }
         return canvas;
     }
+
+    // public static String[][] overlay(int startX, int startY, String color, String[][] canvas, String[][] overlay){
+    //     for (int i = 0; i < overlay.length; i++) {
+    //         for (int j = 0; j < overlay[i].length; j++) {
+    //             if (overlay[i][j] != null) {
+    //                 canvas[startY + i][startX + j] = color+overlay[i][j];
+    //             }
+    //         }
+    //     }
+    //     return canvas;
+    // }
 
     public static String[][] colorize(String[][] canvas, String color){
         for (int y = 0; y < canvas.length; y++) {
