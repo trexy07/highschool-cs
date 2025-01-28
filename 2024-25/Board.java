@@ -30,6 +30,7 @@ public class Board{
     public static int        sizeY;
 
     public        int[]      target = {0,0};
+    public        int        hits   = 5+4+3+3+2;
 
     public Board(String name){
         //"this" is used to specify the instance variable, if theres a local of the same name
@@ -278,9 +279,10 @@ public class Board{
 
     public String hit(int x, int y){
         this.target[0]=y;this.target[1]=x;
+        String prefix = "";
 
         if (this.board[this.target[0]][this.target[1]].substring(1).equals("0")){ // not hit
-            this.board[this.target[0]][this.target[1]] =this.board[this.target[0]][this.target[1]].substring(0,1)+"1";
+            this.board[this.target[0]][this.target[1]] = this.board[this.target[0]][this.target[1]].substring(0,1)+"1";
         } else{
             //pick random spot
             x = (int) (Math.random() * 10);
@@ -289,12 +291,22 @@ public class Board{
                 x = (int) (Math.random() * 10);
                 y = (int) (Math.random() * 10);
             }
+            prefix = "already hit; firing at "+ (this.target[1]+1) + ","   + (this.target[0]+1)+" -";
             // System.out.println("Random hit: "+x+" "+y);
             this.target[0]=y;this.target[1]=x;
             this.board[y][x] =this.board[y][x].substring(0,1)+"1";
+            
         }
-        return (this.board[this.target[0]][this.target[1]].charAt(0) =='0' ? "miss :( " : "hit :) " ) 
-                + "at " + (this.target[1]+1)
+        if (this.board[this.target[0]][this.target[1]].charAt(0) !='0'){
+            hits--;
+        }
+        if (hits==0){ // game over
+        // if (hits==5+4+3+3+1){ // short cut
+            return null;
+        }
+
+        return   prefix + ( this.board[this.target[0]][this.target[1]].charAt(0) =='0' ? "miss :( " :  "hit :) ") // calculate hit or miss
+                + "at " + (this.target[1]+1) // report x&y position
                 + ","   + (this.target[0]+1);
     }
 

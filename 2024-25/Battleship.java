@@ -18,6 +18,7 @@ public class Battleship {
     
     private static       boolean  moved       = false;
     private static       boolean  mouse       = false;
+    private static       boolean  clear       = false;
 
     public  static final int      CYCLE_DELAY = 100; // responsiveness
     public  static final int      BLINK_RATE  = 300; // icon blink rate
@@ -102,10 +103,11 @@ public class Battleship {
                 name1 + "! Input wasd to select target, then hit enter.");
         }
 
-        Perlin p = new Perlin(sizeX, sizeY-1);
 
 
         Thread backgroundThread     = new Thread(() -> {
+            Perlin      p           = new Perlin(sizeX, sizeY-1);
+
             int         cycleTime   = 0;
             boolean     turn        = true;
             
@@ -157,7 +159,8 @@ public class Battleship {
                         // H move cursor to top left
                         // 2j clear screen
                         // 32m green text
-                        prefix = "\033[H\033[2J\033[32m-" + hit_miss + "General " + currentPlayer.name + "! Input wasd to select target, then hit enter.";
+                        prefix = "\033[H\033[2J\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Input wasd to select target, then hit enter.";
+                        // prefix = "\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Input wasd to select target, then hit enter.";
                         
                         output = p1.printBoard((p1==currentPlayer) ? turn:false);
                         canvas = Board.overlayBoard(sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 5, output);
@@ -192,7 +195,68 @@ public class Battleship {
                     cycleTime += CYCLE_DELAY;
                     Thread.sleep(CYCLE_DELAY);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    // System.out.println("Thread interrupted");
+                    // e.printStackTrace();
+                    if (mouse || sizeY>sizeX/2){
+                        // H move cursor to top left
+                        // 2j clear screen
+                        // 32m green text
+                        // prefix = "\033[H\033[2J";
+                        if (mouse){
+                            String[][] greyCanvas = new String[sizeY ][sizeX ];
+                            for (int i = 0; i < sizeY / 2; i++) {
+                                for (int j = 0; j < sizeX; j++) {
+                                    if (i==sizeY/4-5 && j==sizeX/2-5){
+                                        greyCanvas[i][j] = "  "; // light grey escape code followed by 2 spaces
+                                    } else {
+                                        greyCanvas[i][j] = "\033[48;5;236m  "; // light grey escape code followed by 2 spaces
+                                    }
+                                }
+                            }
+                            // System.out.println("grey");
+                            // System.out.println(greyCanvas[1][1]);
+                            canvas = Board.overlayBoard(sizeX, sizeY-1, 0,(sizeY-1)/2, greyCanvas);
+
+                        } else{
+                            canvas = Board.overlayBoard(sizeX, sizeY-1, 0,0, new String[0][0]);
+
+                        }
+
+                        output = otherPlayer.printBoard(turn);
+                        canvas = Board.overlayBoard(sizeX / 2 - 5, (sizeY-1) / 4 - 5, canvas,output);
+
+                        output = currentPlayer.printBoard(false);
+                        canvas = Board.overlayBoard(sizeX / 2 - 5, 3 * (sizeY-1) / 4  - 5, canvas, output);
+                        
+                    } else {
+                        // H move cursor to top left
+                        // 2j clear screen
+                        // 32m green text
+                        // prefix = "\033[H\033[2J\033[32m";
+                        
+                        output = p1.printBoard((p1==currentPlayer) ? turn:false);
+                        canvas = Board.overlayBoard(sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 5, output);
+
+                        output = p2.printBoard((p2==currentPlayer) ? turn:false);
+                        canvas = Board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 5, canvas, output);
+
+                        
+
+                    }
+
+                    // System.out.print("here5");
+
+                    String render = p.nextFrame(canvas);
+
+                    // System.out.print("here6");
+                    // System.out.flush();
+                    System.out.print(render.substring(0, render.length()-5)+"\033[0m");
+                    // System.out.print("here7");
+                    System.out.flush();
+                    clear=true;
+                    // System.out.println("cleared");
+
+                    break;
                 }
             }
         });
@@ -203,6 +267,21 @@ public class Battleship {
         System.out.println("----starting----");
 
         while (true) {
+            // System.out.println(hit_miss);
+            if (hit_miss == null ){ // game over
+                // System.out.println(clear);
+                if (!clear){ // drawing thread not complete
+                    continue;
+                } else { // drawing thread complete; ending
+                // System.out.println("breaking");
+                    System.out.println("\n\033[32m-The "+ (currentPlayer != p1 ? "Japanese" : "American") +" navy was defeated by the general "+ currentPlayer.name +"!\033[0m");
+
+                    System.out.flush();
+                    break;
+                    
+                    // System.exit(0);
+                }
+            }
             // int key = 0;
             // try                     {
             //     key = RawConsoleInput.read(true); // wait or don't wait
@@ -214,7 +293,7 @@ public class Battleship {
             if (key == 3) {
                 // System.out.print("\033[?1000l");
                 // System.out.print("\033[?1006l");
-                System.out.println("\033[?1000l\033[?1006l\033[0m]");
+                System.out.println("\033[?1000l\033[?1006l\033[0m");
                 break;
             }
             // System.out.println("You pressed: " + (char) key);
@@ -247,7 +326,7 @@ public class Battleship {
                         // System.out.println((data[1]+1)/2 - sizeX/3 + 9);
                         int x = (data[1]+1)/2 - sizeX * (p1 == currentPlayer?1:3)/4 + 3;
                         int y = data[2] - sizeY/2 + 3;
-                        System.out.println(" "+x+", "+y);
+                        // System.out.println(" "+x+", "+y);
 
                         if (0 <= x && x <= 9 && 0 <= y && y <= 9){
                             currentPlayer.target[1] = x;
@@ -272,6 +351,18 @@ public class Battleship {
             } else if (key == '\n') {
                 hit_miss = currentPlayer.hit();
 
+                if (hit_miss == null){ // current player loses
+                    System.out.print("\033[?1000l\033[?1006l\033[H\033[2J\033[32m");
+                    // System.out.print("\033[?1000l\033[?1006l\033[32m");
+                    
+                    System.out.print("-The "+ (currentPlayer == p1 ? "Japanese" : "American") +" navy was defeated by the general "+ otherPlayer.name +"!");
+                    // backgroundThread.stop();
+                    backgroundThread.interrupt();
+                    // System.out.println("\033[?1000l\033[?1006l\033[0m");
+                    // System.exit(0);
+                    // break;
+                }
+
                 // switch players
                 Board temp = currentPlayer;
                 currentPlayer = otherPlayer;
@@ -280,7 +371,9 @@ public class Battleship {
             }
             hitChars += (char) key;
         }
+        // System.out.println("anythin");
     }
+
 
     public static void rollingPrint(String output, int delay) {
         int outputLength = output.length();
