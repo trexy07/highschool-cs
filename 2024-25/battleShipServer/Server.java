@@ -1,5 +1,6 @@
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -8,6 +9,9 @@ import java.net.InetSocketAddress;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import java.util.Timer;
+import java.util.TimerTask;
+// import java.util.Calendar;
 
 public class Server {
     
@@ -15,21 +19,36 @@ public class Server {
     private static Map<Integer, Board[]> rows;
     private static Map<Integer, Boolean> turns;
     private static Map<Integer, String > hits;
+    private static Map<Integer, Integer> activity;
+    private static ArrayList<Integer>    freeIds;
 
     // server data
     private static int                   nextId = 0;
 
     public static void main(String[] args) throws Exception {
         // data for each running game
-        rows  = new HashMap<>();
-        turns = new HashMap<>();
-        hits  = new HashMap<>();
+        rows      = new HashMap<>();
+        turns     = new HashMap<>();
+        hits      = new HashMap<>();
+        activity  = new HashMap<>();
+        freeIds   = new ArrayList<>();
         
         // create the server
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
         server.createContext("/", new Handler());
         server.setExecutor(null); // creates a default executor
         server.start();
+
+
+        Timer timer = new Timer();
+        // Schedule the task to run every 24 hours
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                new Handler().age();
+            }
+        }, calendar.getTime(), 24 * 60 * 60 * 1000);
+        // }, 0, 5* 1000);  // testing timer
     }
     
     static class Handler implements HttpHandler {
@@ -62,16 +81,22 @@ public class Server {
                 respond(t,400,"missing argument");
                 return;
             }
-            rows.put( nextId, new Board[]{ new Board(name,locations),null  });
-            turns.put(nextId, true);
-            hits.put( nextId, "");
-            System.out.println(nextId +" started");
+            int id;
+            if (freeIds.size() > 0){ // re use ids
+                id = freeIds.remove(0); //acts like pop if I is an int
+            } else {
+                id = nextId++;
+            }
 
-           
+            rows    .put(id, new Board[]{ new Board(name,locations),null  });
+            turns   .put(id, true);
+            hits    .put(id, "");
+            activity.put(id, 7);
+            System.out.println(id +" started");
 
-            respond(t,200,nextId+"");
+            respond(t,200,id+"");
             
-            nextId++;
+            // nextId++;
             return;
         }
 
@@ -131,27 +156,38 @@ public class Server {
                 x  = Integer.parseInt(args.get("x" ));
                 y  = Integer.parseInt(args.get("y" ));
             } catch (NumberFormatException e){
-                respond(t,400,"invalid id, x, or y");
+                respond(t,406,"invalid id, x, or y");
                 return;
             }
             // System.out.println(id + " " + x + " " + y);
+            // System.out.println(activity.get(id));
             boolean player = args.get("player").equals("T");
             
             if        (!rows.containsKey(id))  {
                 respond(t,406,"game not found");
                 return;
             } else if (rows.get(id)[1] == null){
-                respond(t,409,"game not filled");
+                respond(t,425,"game not filled");
+                return;
+            } else if (activity.get(id) == 0){
+                respond(t,410,"game over");
                 return;
             } else if (turns.get(id) != player){
                 respond(t,425,"not your turn");
                 return;
             } 
-
+            
             Board[] row = rows.get(id);
             
             // System.out.println(row[player?1:0].name); // enemy name check
             String  hit = row[player?1:0].hit(x,y); // get the location it hit
+            if (hit == null){
+                activity.put(id, 0);
+                respond(t,410,"game over (just won)");
+                return;
+            } 
+            activity.put(id, 7);
+
 
             // // debug graphics
             // for (int i = 0; i<row[player?1:0].board.length; i++){
@@ -203,6 +239,22 @@ public class Server {
             respond(t,200,response);
             return;
 
+        }
+
+        public void age(){
+            System.out.println("aging");
+            for (int id : activity.keySet()) {
+                int newValue = activity.get(id) - 1;
+                if (newValue < 0) {
+                    activity.remove(id);
+                    rows.remove(id);
+                    turns.remove(id);
+                    hits.remove(id);
+                    freeIds.add(id);
+                } else {
+                    activity.put(id, newValue);
+                }
+            }
         }
     }
     

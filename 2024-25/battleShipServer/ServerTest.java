@@ -1,3 +1,5 @@
+import java.io.IOException;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -24,7 +26,11 @@ class ServerTest {
         res=sendRequest("http://localhost:8000/join?id=0&name=not%20jeff&locations=17802230356044905440");
         System.out.println(res[1]);
 
-        // join
+        // bonus join (409)
+        res=sendRequest("http://localhost:8000/join?id=0&name=not%20jeff&locations=17802230356044905440");
+        System.out.println(res[1]);
+
+        // get data
         res=sendRequest("http://localhost:8000/receive?id=0");
         System.out.println(res[1]);
 
@@ -32,7 +38,7 @@ class ServerTest {
         res=sendRequest("http://localhost:8000/hit?id=0&player=T&x=7&y=8");
         System.out.println(res[1]);
         
-        // out of turn
+        // out of turn (425)
         res=sendRequest("http://localhost:8000/hit?id=0&player=T&x=7&y=8");
         System.out.println(res[1]);
 
@@ -40,7 +46,7 @@ class ServerTest {
         res=sendRequest("http://localhost:8000/hit?id=0&player=F&x=7&y=8");
         System.out.println(res[1]);
 
-        // re-hit (random hit)
+        // re-hit (208, random hit)
         res=sendRequest("http://localhost:8000/hit?id=0&player=T&x=7&y=8");
         System.out.println(res[1]);
 
@@ -55,7 +61,7 @@ class ServerTest {
     public static String[] sendRequest(String method, String urlString) {
         String[]          result     = new String[2];
         HttpURLConnection connection = null;
-        BufferedReader    reader;
+        BufferedReader    reader     = null;
 
 
         try {
