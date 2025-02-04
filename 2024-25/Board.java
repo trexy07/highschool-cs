@@ -269,8 +269,72 @@ public class Board{
         return output;
     }
 
+    public String[][] printBoardName(boolean blink){
+        String[][] output= new String[12][11];
+
+        if (name.length()%2==1){
+            name+=" ";
+        }
+        if (name.length()>22){
+            name = name.substring(0,22);
+        }
+        for (int i = 0; i < name.length(); i+=2){
+            output[0][i/2] = "\033[38;2;255;215;0m" + name.substring(i,i+2) + "\033[0m";
+        }
+
+        for (int i = 1; i <= 10; i++){
+            // output[0][i] = "\033[38;2;255;215;0m" + ((char) (0x24b0 + i+5))+" \033[0m"; //hollow arial
+            output[i+1][0] = "\033[38;2;255;215;0m" + ((char) (0xff20 + i))+"\033[0m"; //double width
+        }
+
+        for (int i = 1; i <= 10; i++){
+            // output[i][0] = "\033[38;2;255;215;0m" + ((char) (0x2770 + i+5))+" \033[0m"; //negatives
+            // output[0][i] = ((char) (0x2780 + i-1))+" "; //hollow sans-serif
+            output[1][i] = "\033[38;2;255;215;0m" + ((char) (0xff10 + i-1))+"\033[0m"; //double width
+        }
+
+        for (int i = 1; i <= 10; i++){
+            for (int j = 1; j <= 10; j++){
+                String square = this.board[i-1][j-1];
+
+                if (blink && target[0]==i-1 && target[1]==j-1){
+                    // if (blink){
+                    //     output[i][j] = "🎯";
+                    // } else {
+                    //     output[i][j] = "​ ";
+                    // }
+                    output[i+1][j] = "🎯";
+                    // System.out.print("🎯 ");
+                } else if (square.substring(1).equals("0"))   { // not hit
+                    output[i+1][j] = "  ";
+                    // System.out.print("☁️ ");
+                    // System.out.print("  ");
+                } else                                        { //hit
+                    // output[i][j] = "B";
+                    if (square.substring(0,1).equals("0")){ // splash
+                        output[i+1][j] = "💦";
+                        // System.out.print("💦 ");
+                    } else {
+                        output[i+1][j] = "💥";
+                        // System.out.print("hit"+square);
+                        // System.out.print("💥 ");
+
+                    }
+                }
+                // System.out.print(this.board[i][j]);
+                // + this.board[i][j];
+
+
+            }
+            // System.out.println();
+        }
+
+        return output;
+    }
+
     public String[][] printBoard(){
-        return printBoard(false);
+        // return printBoard(false);
+        return printBoardName(false);
     }
     
     public String hit(){

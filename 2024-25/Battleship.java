@@ -49,16 +49,24 @@ public class Battleship {
         for (String arg : args) {
             if (arg.equals("mouse")){
                 System.out.println("Mouse input flag");
-                if (sizeY <= 23){
-                    System.out.println("Terminal too small, currently " + sizeX + ":" + sizeY+ "required ?:24");
+                // if (sizeY <= 23){
+                //     System.out.println("Terminal too small, currently " + sizeX + ":" + sizeY+ "required ?:24");
+                //     return;
+                // }
+                if (sizeY <= 25){
+                    System.out.println("Terminal too small, currently " + sizeX + ":" + sizeY+ "required ?:26");
                     return;
                 }
                 mouse = true;
             }
         }
 
-        if (sizeY <= 11) {
-            System.out.println("Terminal too small, currently " + sizeX + ":" + sizeY+ "required 44:12");
+        // if (sizeY <= 11) {
+        //     System.out.println("Terminal too small, currently " + sizeX + ":" + sizeY+ "required 44:12");
+        //     return;
+        // }
+        if (sizeY <= 12) {
+            System.out.println("Terminal too small, currently " + sizeX + ":" + sizeY+ "required 44:13");
             return;
         }
 
@@ -162,10 +170,10 @@ public class Battleship {
                         prefix = "\033[H\033[2J\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Input wasd to select target, then hit enter.";
                         // prefix = "\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Input wasd to select target, then hit enter.";
                         
-                        output = p1.printBoard((p1==currentPlayer) ? turn:false);
+                        output = p1.printBoardName((p1==currentPlayer) ? turn:false);
                         canvas = Board.overlayBoard(sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 5, output);
 
-                        output = p2.printBoard((p2==currentPlayer) ? turn:false);
+                        output = p2.printBoardName((p2==currentPlayer) ? turn:false);
                         canvas = Board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 5, canvas, output);
 
                         
