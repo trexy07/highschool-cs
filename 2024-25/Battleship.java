@@ -46,20 +46,7 @@ public class Battleship {
             e.printStackTrace();
         }
 
-        for (String arg : args) {
-            if (arg.equals("mouse")){
-                System.out.println("Mouse input flag");
-                // if (sizeY <= 23){
-                //     System.out.println("Terminal too small, currently " + sizeX + ":" + sizeY+ "required ?:24");
-                //     return;
-                // }
-                if (sizeY <= 25){
-                    System.out.println("Terminal too small, currently " + sizeX + ":" + sizeY+ "required ?:26");
-                    return;
-                }
-                mouse = true;
-            }
-        }
+        
 
         // if (sizeY <= 11) {
         //     System.out.println("Terminal too small, currently " + sizeX + ":" + sizeY+ "required 44:12");
@@ -120,55 +107,34 @@ public class Battleship {
             boolean     turn        = true;
             
             String[][]  output      = p1.printBoard(true);
-            // String[][] canvas = Board.overlayBoard(       sizeX / 4 - 5, sizeY / 2 - 5, output);
             String[][]  canvas      = Board.overlayBoard(sizeX,sizeY-1,  sizeX / 4 - 5, (sizeY-1) / 2 - 5, output);
 
             output = p2.printBoard(false);
             canvas = Board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 5, canvas, output);
 
 
-            // String[][] canvas= new String[sizeY][sizeX]; // x and y 
             while (true) {
                 try   {
                     String prefix;
                     String render;
-                    if (mouse || sizeY>sizeX/2){
+                    if (sizeY>sizeX/2){ // render vertically 
                         // H move cursor to top left
                         // 2j clear screen
                         // 32m green text
-                        prefix = "\033[H\033[2J";
-                        if (mouse){
-                            String[][] greyCanvas = new String[sizeY ][sizeX ];
-                            for (int i = 0; i < sizeY / 2; i++) {
-                                for (int j = 0; j < sizeX; j++) {
-                                    if (i==sizeY/4-5 && j==sizeX/2-5){
-                                        greyCanvas[i][j] = "  "; // light grey escape code followed by 2 spaces
-                                    } else {
-                                        greyCanvas[i][j] = "\033[48;5;236m  "; // light grey escape code followed by 2 spaces
-                                    }
-                                }
-                            }
-                            // System.out.println("grey");
-                            // System.out.println(greyCanvas[1][1]);
-                            canvas = Board.overlayBoard(sizeX, sizeY-1, 0,(sizeY-1)/2, greyCanvas);
-
-                        } else{
-                            canvas = Board.overlayBoard(sizeX, sizeY-1, 0,0, new String[0][0]);
-
-                        }
-
-                        output = otherPlayer.printBoard(turn);
-                        canvas = Board.overlayBoard(sizeX / 2 - 5, (sizeY-1) / 4 - 5, canvas,output);
-
-                        output = currentPlayer.printBoard(false);
-                        canvas = Board.overlayBoard(sizeX / 2 - 5, 3 * (sizeY-1) / 4  - 5, canvas, output);
                         
-                    } else {
+                        prefix = "\033[H\033[2J\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Input wasd to select target, then hit enter.";
+
+                        output = p1.printBoardName((p1==currentPlayer) ? turn:false);
+                        canvas = Board.overlayBoard(sizeX, sizeY-1, sizeX / 2 - 5, (sizeY-1) / 4 - 6,output);
+
+                        output = p2.printBoardName((p2==currentPlayer) ? turn:false);
+                        canvas = Board.overlayBoard(sizeX / 2 - 5, 3 * (sizeY-1) / 4  - 6, canvas, output);
+                        
+                    } else { // render horizontally
                         // H move cursor to top left
                         // 2j clear screen
                         // 32m green text
                         prefix = "\033[H\033[2J\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Input wasd to select target, then hit enter.";
-                        // prefix = "\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Input wasd to select target, then hit enter.";
                         
                         output = p1.printBoardName((p1==currentPlayer) ? turn:false);
                         canvas = Board.overlayBoard(sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 5, output);
@@ -203,67 +169,27 @@ public class Battleship {
                     cycleTime += CYCLE_DELAY;
                     Thread.sleep(CYCLE_DELAY);
                 } catch (InterruptedException e) {
-                    // System.out.println("Thread interrupted");
-                    // e.printStackTrace();
-                    if (mouse || sizeY>sizeX/2){
-                        // H move cursor to top left
-                        // 2j clear screen
-                        // 32m green text
-                        // prefix = "\033[H\033[2J";
-                        if (mouse){
-                            String[][] greyCanvas = new String[sizeY ][sizeX ];
-                            for (int i = 0; i < sizeY / 2; i++) {
-                                for (int j = 0; j < sizeX; j++) {
-                                    if (i==sizeY/4-5 && j==sizeX/2-5){
-                                        greyCanvas[i][j] = "  "; // light grey escape code followed by 2 spaces
-                                    } else {
-                                        greyCanvas[i][j] = "\033[48;5;236m  "; // light grey escape code followed by 2 spaces
-                                    }
-                                }
-                            }
-                            // System.out.println("grey");
-                            // System.out.println(greyCanvas[1][1]);
-                            canvas = Board.overlayBoard(sizeX, sizeY-1, 0,(sizeY-1)/2, greyCanvas);
+                    // render one last time
 
-                        } else{
-                            canvas = Board.overlayBoard(sizeX, sizeY-1, 0,0, new String[0][0]);
+                    if (sizeY>sizeX/2){
+                        output = p1.printBoardName(false);
+                        canvas = Board.overlayBoard(sizeX, sizeY-1, sizeX / 2 - 5, (sizeY-1) / 4 - 6,output);
 
-                        }
-
-                        output = otherPlayer.printBoard(turn);
-                        canvas = Board.overlayBoard(sizeX / 2 - 5, (sizeY-1) / 4 - 5, canvas,output);
-
-                        output = currentPlayer.printBoard(false);
-                        canvas = Board.overlayBoard(sizeX / 2 - 5, 3 * (sizeY-1) / 4  - 5, canvas, output);
-                        
+                        output = p2.printBoardName(false);
+                        canvas = Board.overlayBoard(sizeX / 2 - 5, 3 * (sizeY-1) / 4 - 6, canvas, output);
                     } else {
-                        // H move cursor to top left
-                        // 2j clear screen
-                        // 32m green text
-                        // prefix = "\033[H\033[2J\033[32m";
-                        
-                        output = p1.printBoard((p1==currentPlayer) ? turn:false);
+                        output = p1.printBoardName(false);
                         canvas = Board.overlayBoard(sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 5, output);
 
-                        output = p2.printBoard((p2==currentPlayer) ? turn:false);
+                        output = p2.printBoardName(false);
                         canvas = Board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 5, canvas, output);
-
-                        
-
                     }
-
-                    // System.out.print("here5");
 
                     String render = p.nextFrame(canvas);
 
-                    // System.out.print("here6");
-                    // System.out.flush();
                     System.out.print(render.substring(0, render.length()-5)+"\033[0m");
-                    // System.out.print("here7");
                     System.out.flush();
-                    clear=true;
-                    // System.out.println("cleared");
-
+                    clear=true; // make sure the drawing thread is complete
                     break;
                 }
             }
@@ -330,13 +256,31 @@ public class Battleship {
                         if (data[3] == 1) {
                             continue;
                         }
-                        
-                        // System.out.println((data[1]+1)/2 - sizeX/3 + 9);
-                        int x = (data[1]+1)/2 - sizeX * (p1 == currentPlayer?1:3)/4 + 3;
-                        int y = data[2] - sizeY/2 + 3;
-                        // System.out.println(" "+x+", "+y);
+                        int x;
+                        int y;
+                        System.out.println("\n"+data[1] + " " + data[2]);
 
+                        // if (mouse || sizeY>sizeX/2){
+                        if (sizeY>sizeX/2){
+                            System.out.println("mouse");
+                            // int x = (data[1]+1)/2 - sizeX * (p1 == currentPlayer?1:3)/4 + 3;
+                            x = (data[1]+1)/2 - sizeX/2+3;
+                            System.out.println(x);
+                            // int y = data[2] - sizeY/2 + 2;
+                            // y = data[2] - (p1 == currentPlayer ?1:2) * (sizeY-1) / 3  + 5-1;
+                            y = data[2] - (p1 == currentPlayer ?1:2) * (sizeY-1) / 3  + 4;
+                            System.out.println(y);
+                        } else{
+                            // System.out.println((data[1]+1)/2 - sizeX/3 + 9);
+                            x = (data[1]+1)/2 - sizeX * (p1 == currentPlayer?1:3)/4 + 3;
+                            // int y = data[2] - sizeY/2 + 3;
+                            y = data[2] - sizeY/2 + 2;
+                            // System.out.println(" "+x+", "+y);
+                        }
+
+                        System.out.println(0 <= x && x <= 9 && 0 <= y && y <= 9);
                         if (0 <= x && x <= 9 && 0 <= y && y <= 9){
+                            System.out.println("counted");
                             currentPlayer.target[1] = x;
                             currentPlayer.target[0] = y;
                             moved = true;
