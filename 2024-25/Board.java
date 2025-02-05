@@ -241,6 +241,8 @@ public class Board{
                     //     output[i][j] = "​ ";
                     // }
                     output[i][j] = "🎯";
+                    // output[i+1][j] = "\033[5m🎯\033[25m"; // blink escape code doesn't work in vscode
+
                     // System.out.print("🎯 ");
                 } else if (square.substring(1).equals("0"))   { // not hit
                     output[i][j] = "  ";
@@ -304,6 +306,7 @@ public class Board{
                     //     output[i][j] = "​ ";
                     // }
                     output[i+1][j] = "🎯";
+                    // output[i+1][j] = "\033[5m🎯\033[25m"; // blink escape code doesn't work in vscode
                     // System.out.print("🎯 ");
                 } else if (square.substring(1).equals("0"))   { // not hit
                     output[i+1][j] = "  ";
