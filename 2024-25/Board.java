@@ -1,4 +1,10 @@
 import java.io.IOException;
+import java.util.ArrayList;
+// import java.io.BufferedWriter;
+// import java.io.FileWriter;
+// import java.io.FileOutputStream;
+import java.io.DataOutputStream;
+
 // import perlin.*;
 import drawing.*;
 
@@ -23,20 +29,27 @@ public class Board{
 
     */
     public        String[][] board;
-    
-    // public  int owner;
     public        String     name;
+    
     public static int        sizeX;
     public static int        sizeY;
 
     public        int[]      target = {0,0};
     public        int        hits   = 5+4+3+3+2;
 
+    public        ArrayList<Integer>    history; // not needed?
+    // public        BufferedWriter        save;
+    // public        FileOutputStream      save;
+    public        DataOutputStream      save;
+    public        byte[]                locations = new byte[5];
+
+
     public Board(String name){
         //"this" is used to specify the instance variable, if theres a local of the same name
-        // this.owner = owner; 
         this.name  = name;
         this.board = new String[10][10];
+        this.history = new ArrayList<Integer>();
+
         for (int i = 0; i < 10; i++){
             for (int j = 0; j < 10; j++){
                 this.board[i][j] = "00"; // each spot is boat/no boat and hit/none
@@ -55,10 +68,24 @@ public class Board{
 
     }
 
+    public Board(String name, DataOutputStream save){
+        this(name);
+        this.save = save;
+        
+        try{
+            this.save.writeBytes(name);
+            this.save.write(127);
+            this.save.write(this.locations);//(char[])
+            this.save.write(127);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public Board(String name, String locations){ // board constructor for the server to use
-        // this.owner = owner; 
         this.name  = name;
         this.board = new String[10][10];
+        this.history = new ArrayList<Integer>();
         for (int i = 0; i < 10; i++){
             for (int j = 0; j < 10; j++){
                 this.board[i][j] = "00";
@@ -69,6 +96,20 @@ public class Board{
         this.sizeY = 10;
         this.setBoard(locations);
 
+    }
+
+    public Board(String name, String locations, DataOutputStream save){
+        this(name,locations);
+        this.save = save;
+        
+        try{
+            this.save.writeBytes(name);
+            this.save.write(127);
+            this.save.write(this.locations);
+            this.save.write(127);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public String toString(){
@@ -153,6 +194,9 @@ public class Board{
                    
                 }
 
+                // record ship placement
+                this.locations[i-1] = (byte)(x + y*10 + rotation*256);
+
             }
 
         }
@@ -166,13 +210,15 @@ public class Board{
         // x|y: 0-9
         // dir: 0-1
         for(int i = 0; i<5; i++){
-            int type     = (locations.charAt(i*4  )) - '0';
+        // if (false){ int i = 0;
+            // int type     = (locations.charAt(i*4  )) - '0';
             int x        = (locations.charAt(i*4+1)) - '0';
             int y        = (locations.charAt(i*4+2)) - '0';
             int rotation = (locations.charAt(i*4+3)) - '0';
             // System.out.println(  String.valueOf(type)+x+y+rotation);
 
-            int length   = type + (type<=2?1:0);
+            // int length   = type + (type<=2?1:0);
+            int length   = i + (i<2?2:1);
             // System.out.println(length);
 
             boolean fail = false;
@@ -206,15 +252,23 @@ public class Board{
             for (int j = 0; j < length; j++){
                 if (rotation==0){
                     // System.out.println("x: "+(x+j)+" y: "+y);
-                    board[y][x+j] = type+"0";
+                    board[y][x+j] = i+1+"0";
                 } else          {
                     // System.out.println("x: "+x+" y: "+(y+j));
-                    board[y+j][x] = type+"0";
+                    board[y+j][x] = i+1+"0";
                 }
                 
             }
 
+            // record ship placement
+            this.locations[i-1] = (byte)(x + y*10 + rotation*256);
         }
+
+        // try{
+        //     this.save.write(locations);
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
     }
 
     public String[][] printBoard(boolean blink){
@@ -364,6 +418,15 @@ public class Board{
             this.board[y][x] =this.board[y][x].substring(0,1)+"1";
             
         }
+
+        this.history.add(this.target[0]*10+this.target[1]); // not needed?
+        if (save!=null)
+            try{
+                this.save.write(this.target[0]*10+this.target[1]); // save hit to file
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         if (this.board[this.target[0]][this.target[1]].charAt(0) !='0'){
             hits--;
         }
@@ -427,7 +490,7 @@ public class Board{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            }
+        }
         // p.loop();
 
         // System.out.println(b.board[0][0]); // should fail because board is private

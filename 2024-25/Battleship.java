@@ -1,6 +1,12 @@
 import java.io.IOException;
 import java.util.Scanner;
 import input.RawConsoleInput;
+
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
+// import java.io.FileNotFoundException;
+import java.io.File;
+
 // import perlin.*;
 import drawing.*;
 
@@ -10,6 +16,7 @@ public class Battleship {
     private static       Board    p2;
     private static       Board    currentPlayer;
     private static       Board    otherPlayer;
+    private static       DataOutputStream save;
 
     private static       int      sizeX       = 0;
     private static       int      sizeY       = 0;
@@ -17,26 +24,15 @@ public class Battleship {
     private static       String   hit_miss    = "";
     
     private static       boolean  moved       = false;
-    // private static       boolean  mouse       = false;
     private static       boolean  clear       = false;
 
     public  static final int      CYCLE_DELAY = 100; // responsiveness
     public  static final int      BLINK_RATE  = 300; // icon blink rate
     public  static final int      RENDER_RATE = 1000;// background move rate
 
-    private static       String   hitChars    = "";
-
     public static void main(String[] args) {
-        // escape codes
-        // ?1000h mouse reporting
-        // ?1006h mouse format
-        // 2j clear screen
-        // 32m green text
-        System.out.print("\033[?1000h\033[?1006h\033[H\033[2J");
-        System.out.flush();
         
-        
-
+        // find terminal size
         try                                            {
             int[] terminalSize = TerminalSize.getTerminalSize(); // import from other file
             sizeX = terminalSize[1] / 2;
@@ -46,31 +42,57 @@ public class Battleship {
             e.printStackTrace();
         }
 
-        
-
-        // if (sizeY <= 11) {
-        //     System.out.println("Terminal too small, currently " + sizeX + ":" + sizeY+ "required 44:12");
-        //     return;
-        // }
-        if (sizeY <= 12) {
-            System.out.println("Terminal too small, currently " + sizeX + ":" + sizeY+ "required 44:13");
+        // minimum terminal sizes: 44:13 or 11:25 
+        if ((sizeX <44 || sizeY < 13 ) && (sizeX < 22 || sizeY<25) ) {
+            System.out.println("\033[32mThe Terminal is too small; current size is " + sizeX + ":" + sizeY+ "\nminimum size is 44:13 or 22:25\033[0m");
             return;
         }
 
+        // escape codes before start
+        // ?1000h mouse reporting
+        // ?1006h mouse format
+        // 2j clear screen
+        System.out.print("\033[?1000h\033[?1006h\033[H\033[2J");
+        System.out.flush();
+
+
+        // get player names or skip to debug
         if ("debug" == "debug") {
-            p1 = new Board("player1");
-            p2 = new Board("player2");
+            try{
+                new File("save.bin").createNewFile();
+                save = new DataOutputStream(new FileOutputStream("save.bin"));
+            } catch (IOException e){
+                System.out.println("File not found");
+            }
+            p1   = new Board("player1",save);
+            p2   = new Board("player2",save);
             currentPlayer = p1;
             otherPlayer = p2;
 
         } else               { // player names
             Scanner scan = new Scanner(System.in); // Create a Scanner obj
+
+            // ask to save
+            System.out.print("\033[32mdo you want to save the game? (y/N)\033[0m");
+            String saveGame = scan.nextLine(); // Read user input
+            if (saveGame.equals("y") || saveGame.equals("Y")) {
+                try {
+                    
+                    new File("save.bin").createNewFile();
+                    save = new DataOutputStream(new FileOutputStream("save.bin"));
+                    
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
             System.out.print("\033[32m");
             rollingPrint("Japan’s navy under control of General... ");
             System.out.println("(input player 1 name)");
 
             String name1 = scan.nextLine(); // Read user input
-            p1 = new Board(name1);
+            // p1 = new Board(name1);
+            p1 = new Board(name1, save);
             currentPlayer = p1;
 
             System.out.print("\033[H\033[2J");
@@ -82,7 +104,8 @@ public class Battleship {
             System.out.println("(input player 2 name)");
 
             String name2 = scan.nextLine(); // Read user input
-            p2 = new Board(name2);
+            // p2 = new Board(name2);
+            p2 = new Board(name2, save);
             otherPlayer = p2;
 
             System.out.print("\033[H\033[2J");
@@ -100,7 +123,7 @@ public class Battleship {
 
 
 
-        Thread backgroundThread     = new Thread(() -> {
+        Thread renderingThread     = new Thread(() -> { // render (background) thread
             Perlin      p           = new Perlin(sizeX, sizeY-1);
 
             int         cycleTime   = 0;
@@ -137,10 +160,10 @@ public class Battleship {
                         prefix = "\033[H\033[2J\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Input wasd to select target, then hit enter.";
                         
                         output = p1.printBoardName((p1==currentPlayer) ? turn:false);
-                        canvas = Board.overlayBoard(sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 5, output);
+                        canvas = Board.overlayBoard(sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 6, output);
 
                         output = p2.printBoardName((p2==currentPlayer) ? turn:false);
-                        canvas = Board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 5, canvas, output);
+                        canvas = Board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 6, canvas, output);
 
                         
 
@@ -179,10 +202,10 @@ public class Battleship {
                         canvas = Board.overlayBoard(sizeX / 2 - 5, 3 * (sizeY-1) / 4 - 6, canvas, output);
                     } else {
                         output = p1.printBoardName(false);
-                        canvas = Board.overlayBoard(sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 5, output);
+                        canvas = Board.overlayBoard(sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 6, output);
 
                         output = p2.printBoardName(false);
-                        canvas = Board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 5, canvas, output);
+                        canvas = Board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 6, canvas, output);
                     }
 
                     String render = p.nextFrame(canvas);
@@ -195,12 +218,17 @@ public class Battleship {
             }
         });
 
-        backgroundThread.setDaemon(true);
-        backgroundThread.start();
+        renderingThread.setDaemon(true);
+        renderingThread.start();
 
         System.out.println("----starting----");
+        try{
+            save.writeLong(System.currentTimeMillis()); // game start time
+        } catch (IOException e){
+            e.printStackTrace();
+        }
 
-        while (true) {
+        while (true) { // input (main) thread
             // System.out.println(hit_miss);
             if (hit_miss == null ){ // game over
                 // System.out.println(clear);
@@ -257,7 +285,7 @@ public class Battleship {
                         }
                         int x;
                         int y;
-                        System.out.println("\n"+data[1] + " " + data[2]);
+                        // System.out.println("\n"+data[1] + " " + data[2]);
 
                         if (sizeY>sizeX/2){ // vertical clicking
                             // offset the points to click
@@ -269,7 +297,7 @@ public class Battleship {
                             y = data[2] - sizeY/2 + 2;
                         }
 
-                        System.out.println(0 <= x && x <= 9 && 0 <= y && y <= 9);
+                        // System.out.println(0 <= x && x <= 9 && 0 <= y && y <= 9);
                         if (0 <= x && x <= 9 && 0 <= y && y <= 9){
                             System.out.println("counted");
                             currentPlayer.target[1] = x;
@@ -295,12 +323,18 @@ public class Battleship {
                 hit_miss = currentPlayer.hit();
 
                 if (hit_miss == null){ // current player loses
+                    try {
+                        save.writeByte(127);
+                        save.writeLong(System.currentTimeMillis()); // game end time
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     System.out.print("\033[?1000l\033[?1006l\033[H\033[2J\033[32m");
                     // System.out.print("\033[?1000l\033[?1006l\033[32m");
                     
                     System.out.print("-The "+ (currentPlayer == p1 ? "Japanese" : "American") +" navy was defeated by the general "+ otherPlayer.name +"!");
-                    // backgroundThread.stop();
-                    backgroundThread.interrupt();
+                    // renderingThread.stop();
+                    renderingThread.interrupt();
                     // System.out.println("\033[?1000l\033[?1006l\033[0m");
                     // System.exit(0);
                     // break;
@@ -312,9 +346,7 @@ public class Battleship {
                 otherPlayer = temp;
 
             }
-            hitChars += (char) key;
         }
-        // System.out.println("anythin");
     }
 
 
