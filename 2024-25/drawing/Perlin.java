@@ -215,16 +215,18 @@ public class Perlin {
             // System.out.println();
             for (int x = 0; x < sizeX; x++) {
                 if (grid2[y][x] > MINIMUM_WIND) {
-                    output += "\033[48;2;" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + "m  \033[0m";
+                    // output += "\033[48;2;" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + "m  \033[0m";
+                    output += "\033[48;2;" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + "m  ";
                     // System.out.print("\033[48;2;" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + "m  \033[0m");
                 } else {
-                    output += "\033[48;2;0;0;" + (int) ((grid1[y][x] + 1) * 127.5) + "m  \033[0m";
+                    // output += "\033[48;2;0;0;" + (int) ((grid1[y][x] + 1) * 127.5) + "m  \033[0m";
+                    output += "\033[48;2;0;0;" + (int) ((grid1[y][x] + 1) * 127.5) + "m  ";
                     // System.out.print("\033[48;2;0;0;" + (int) ((grid1[y][x] + 1) * 127.5) + "m  \033[0m");
                 }
             }
             // System.out.println();
         }
-        return output;
+        return output+"\033[0m";
     }
 
     private static String render(double[][] grid1, double[][] grid2, String[][] overlay) { // renders with an overlay and chosen noise 
@@ -240,20 +242,23 @@ public class Perlin {
                 if (square == null) {
 
                     if (grid2[y][x] > MINIMUM_WIND) {
-                        output += "\033[48;2;" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + "m  \033[0m";
+                        // output += "\033[48;2;" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + "m  \033[0m";
+                        output += "\033[48;2;" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + "m  ";
                         // System.out.print("\033[48;2;" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + ";" + (int) ((grid2[y][x] + 1) * 127.5) + "m  \033[0m");
                     } else {
-                        output += "\033[48;2;0;0;" + (int) ((grid1[y][x] + 1) * 127.5) + "m  \033[0m";
+                        // output += "\033[48;2;0;0;" + (int) ((grid1[y][x] + 1) * 127.5) + "m  \033[0m";
+                        output += "\033[48;2;0;0;" + (int) ((grid1[y][x] + 1) * 127.5) + "m  ";
                         // System.out.print("\033[48;2;0;0;" + (int) ((grid1[y][x] + 1) * 127.5) + "m  \033[0m");
                     }
                 } else {
                     // System.out.println("overlay");
-                    output += "\033[48;2;0;0;" + (int) ((grid1[y][x] + 1) * 127.5) + "m" + square + "\033[0m";
+                    // output += "\033[48;2;0;0;" + (int) ((grid1[y][x] + 1) * 127.5) + "m" + square + "\033[0m";
+                    output += "\033[48;2;0;0;" + (int) ((grid1[y][x] + 1) * 127.5) + "m" + square;
                 }
             }
             // System.out.println();
         }
-        return output;
+        return output+"\033[0m";
 
     }
 
