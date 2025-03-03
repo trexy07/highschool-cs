@@ -65,6 +65,8 @@ public class Battleship {
             p2   = new Board("player2",save);
             currentPlayer = p1;
             otherPlayer = p2;
+            p1.side(false);
+            p2.side(true);
 
         } else               { // player names
             Scanner scan = new Scanner(System.in); // Create a Scanner obj
@@ -90,6 +92,7 @@ public class Battleship {
             String name1 = scan.nextLine(); // Read user input
             // p1 = new Board(name1);
             p1 = new Board(name1, save);
+            p1.side(false);
             currentPlayer = p1;
 
             System.out.print("\033[H\033[2J");
@@ -103,6 +106,7 @@ public class Battleship {
             String name2 = scan.nextLine(); // Read user input
             // p2 = new Board(name2);
             p2 = new Board(name2, save);
+            p1.side(true);
             otherPlayer = p2;
 
             System.out.print("\033[H\033[2J");
@@ -317,7 +321,7 @@ public class Battleship {
                 currentPlayer.target[1] = Math.min(9, currentPlayer.target[1] + 1);
                 moved = true;
             } else if (key == '\n') {
-                hit_miss = currentPlayer.hit();
+                hit_miss = currentPlayer.hit(); // attack the player
 
                 if (hit_miss == null){ // current player loses
                     try {

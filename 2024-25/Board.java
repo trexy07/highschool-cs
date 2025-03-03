@@ -18,12 +18,12 @@ public class Board{
     boat id's:
     No. Class of ship   Size
     0   Empty           1
-    1   Carrier         5
-    2   Battleship      4
-    3   Destroyer       3
-    4   Submarine       3
-    5   Patrol Boat     2
-
+    1   Destroyer       2
+    2   Submarine       3
+    3   Cruiser         3
+    4   Battleship      4
+    5   Carrier         5
+    
     hits:
     1 = hit
     0 = not hit
@@ -31,20 +31,25 @@ public class Board{
     each square = boat id + hit
 
     */
-    public        String[][] board;
-    public        String     name;
+    public              String[][] board;
+    public              String     name;
     
-    public static int        sizeX;
-    public static int        sizeY;
+    public static       int        sizeX;
+    public static       int        sizeY;
 
-    public        int[]      target = {0,0};
-    public        int        hits   = 5+4+3+3+2;
+    public              int[]      target = {0,0};
+    // public        int        hits   = 5+4+3+3+2;
+    public              int        hits[]   = {2,3,3,4,5};
+    public              String[]   ships;
+    public static final String[]   AMERICAN ={"USS Shaw","USS Narwhal","USS Helena","USS Arizona","USS Enterprise"}; // real ships near/at pearl harbor
+    public static final String[]   JAPANESE ={"IJN Akebono","IJN I-19", "IJN Chikuma","IJN Nagato","IJN Akagi"};
+    
 
-    public        ArrayList<Integer>    history; // not needed?
+    public              ArrayList<Integer>    history; // not needed?
     // public        BufferedWriter        save;
     // public        FileOutputStream      save;
-    public        DataOutputStream      save;
-    public        byte[]                locations = new byte[5];
+    public              DataOutputStream      save;
+    public              byte[]                locations = new byte[5];
 
 
     public Board(String name){
@@ -113,6 +118,10 @@ public class Board{
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void side(boolean force){
+        ships = force ? AMERICAN : JAPANESE;
     }
 
     public String toString(){
@@ -417,7 +426,7 @@ public class Board{
                 y = (int) (Math.random() * 10);
             }
             // prefix = "already hit; firing at "+ (this.target[1]+1) + ","   + (this.target[0]+1)+" -";
-            prefix = "already hit"+ (this.target[1]+1) + "," + (this.target[0]+1) + "-";
+            prefix = "already hit "+ (this.target[1]+1) + "," + (this.target[0]+1) + " -";
             // System.out.println("Random hit: "+x+" "+y);
             this.target[0]=y;this.target[1]=x;
             this.board[y][x] =this.board[y][x].substring(0,1)+"1";
@@ -432,17 +441,32 @@ public class Board{
                 e.printStackTrace();
             }
 
-        if (this.board[this.target[0]][this.target[1]].charAt(0) !='0'){
-            hits--;
+        if (this.board[this.target[0]][this.target[1]].charAt(0) !='0'){ // check hit or miss
+            // hits--;
+            hits[this.board[this.target[0]][this.target[1]].charAt(0)-'1']--; // get ship id and decrement hits
+            prefix += "hit :) ";
+            if (hits[this.board[this.target[0]][this.target[1]].charAt(0)-'1']==0){
+                prefix += "& sunk the " + ships[this.board[this.target[0]][this.target[1]].charAt(0)-'1'] + "! ";
+            }
+
         }
-        if (hits==0){ // game over
-        // if (hits==5+4+3+3+1){ // short cut
-            return null;
+        else{
+            prefix += "miss :( ";
         }
 
-        return   prefix + ( this.board[this.target[0]][this.target[1]].charAt(0) =='0' ? "miss :( " :  "hit :) ") // calculate hit or miss
-                + "at " + (this.target[1]) // report x&y position
-                + ","   + (this.target[0]);
+        for(int hit:hits){ //check if all ships are sunk
+            if (hit!=0){ // game not over
+                // return prefix + ( this.board[this.target[0]][this.target[1]].charAt(0) =='0' ? "miss :( " :  "hit :) ") // calculate hit or miss
+                return prefix // message to player/s
+                + "at " + (this.target[1]) + ","   + (this.target[0]) +" -";// report x&y position
+            }
+        }
+        return null; // game over
+
+        // if (hits==0){ // game over
+        // // if (hits==5+4+3+3+1){ // short cut
+        //     return null;
+        // }
     }
 
     public static String[][] overlayBoard(int newX, int newY, int startX, int startY, String[][] overlay){
