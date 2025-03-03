@@ -1,14 +1,11 @@
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Scanner;
-import input.RawConsoleInput;
 
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
-// import java.io.FileNotFoundException;
-import java.io.File;
-
-// import perlin.*;
 import drawing.*;
+import input.RawConsoleInput;
 
 public class Battleship {
 
@@ -118,13 +115,13 @@ public class Battleship {
             rollingPrint(" sits unassuming of the looming attack on his ships.\nGeneral " +
                 name1 + " has the advantage to attack first.\nThe harbor is fogged over, General " +
                 name1 + " is tasked with picking targets.\n\n-General " +
-                name1 + "! Input wasd to select target, then hit enter.");
+                name1 + "! Input wasd to select target, then hit enter.\n");
         }
 
 
 
         Thread renderingThread     = new Thread(() -> { // render (background) thread
-            Perlin      p           = new Perlin(sizeX, sizeY-1);
+            Perlinv2      p           = new Perlinv2(sizeX, sizeY-1);
 
             int         cycleTime   = 0;
             boolean     turn        = true;
@@ -145,7 +142,7 @@ public class Battleship {
                         // 2j clear screen
                         // 32m green text
                         
-                        prefix = "\033[H\033[2J\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Input wasd to select target, then hit enter.";
+                        prefix = "\033[H\033[2J\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Input wasd to select target, then hit enter.\n";
 
                         output = p1.printBoardName((p1==currentPlayer) ? turn:false);
                         canvas = Board.overlayBoard(sizeX, sizeY-1, sizeX / 2 - 5, (sizeY-1) / 4 - 6,output);
@@ -157,7 +154,7 @@ public class Battleship {
                         // H move cursor to top left
                         // 2j clear screen
                         // 32m green text
-                        prefix = "\033[H\033[2J\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Input wasd to select target, then hit enter.";
+                        prefix = "\033[H\033[2J\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Input wasd to select target, then hit enter.\n";
                         
                         output = p1.printBoardName((p1==currentPlayer) ? turn:false);
                         canvas = Board.overlayBoard(sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 6, output);
@@ -299,7 +296,7 @@ public class Battleship {
 
                         // System.out.println(0 <= x && x <= 9 && 0 <= y && y <= 9);
                         if (0 <= x && x <= 9 && 0 <= y && y <= 9){
-                            System.out.println("counted");
+                            // System.out.println("click confirmed");
                             currentPlayer.target[1] = x;
                             currentPlayer.target[0] = y;
                             moved = true;
@@ -332,7 +329,7 @@ public class Battleship {
                     System.out.print("\033[?1000l\033[?1006l\033[H\033[2J\033[32m");
                     // System.out.print("\033[?1000l\033[?1006l\033[32m");
                     
-                    System.out.print("-The "+ (currentPlayer == p1 ? "Japanese" : "American") +" navy was defeated by the general "+ otherPlayer.name +"!");
+                    System.out.print("-The "+ (currentPlayer == p1 ? "Japanese" : "American") +" navy was defeated by the general "+ otherPlayer.name +"!\n");
                     // renderingThread.stop();
                     renderingThread.interrupt();
                     // System.out.println("\033[?1000l\033[?1006l\033[0m");
@@ -348,7 +345,6 @@ public class Battleship {
             }
         }
     }
-
 
     public static void rollingPrint(String output, int delay) {
         int outputLength = output.length();

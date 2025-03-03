@@ -5,6 +5,9 @@ import java.util.ArrayList;
 // import java.io.FileOutputStream;
 import java.io.DataOutputStream;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+
 // import perlin.*;
 import drawing.*;
 
@@ -92,8 +95,8 @@ public class Board{
             }
         }
 
-        this.sizeX = 10;
-        this.sizeY = 10;
+        sizeX = 10;
+        sizeY = 10;
         this.setBoard(locations);
 
     }
@@ -402,17 +405,19 @@ public class Board{
         this.target[0]=y;this.target[1]=x;
         String prefix = "";
 
-        if (this.board[this.target[0]][this.target[1]].substring(1).equals("0")){ // not hit
+        // if (this.board[this.target[0]][this.target[1]].substring(1).equals("0")){ // not hit
+        if (this.board[this.target[0]][this.target[1]].charAt(1) =='0'){ // not hit
             this.board[this.target[0]][this.target[1]] = this.board[this.target[0]][this.target[1]].substring(0,1)+"1";
         } else{
             //pick random spot
             x = (int) (Math.random() * 10);
-            y = (int) (Math.random() * 10);
-            while (this.board[y][x].charAt(0) =='1'){ // already hit
+            y = (int) (Math.random() * 10); // can hit already hit square and breaks
+            while (this.board[y][x].charAt(1) =='1'){ // already hit
                 x = (int) (Math.random() * 10);
                 y = (int) (Math.random() * 10);
             }
-            prefix = "already hit; firing at "+ (this.target[1]+1) + ","   + (this.target[0]+1)+" -";
+            // prefix = "already hit; firing at "+ (this.target[1]+1) + ","   + (this.target[0]+1)+" -";
+            prefix = "already hit"+ (this.target[1]+1) + "," + (this.target[0]+1) + "-";
             // System.out.println("Random hit: "+x+" "+y);
             this.target[0]=y;this.target[1]=x;
             this.board[y][x] =this.board[y][x].substring(0,1)+"1";
@@ -436,8 +441,8 @@ public class Board{
         }
 
         return   prefix + ( this.board[this.target[0]][this.target[1]].charAt(0) =='0' ? "miss :( " :  "hit :) ") // calculate hit or miss
-                + "at " + (this.target[1]+1) // report x&y position
-                + ","   + (this.target[0]+1);
+                + "at " + (this.target[1]) // report x&y position
+                + ","   + (this.target[0]);
     }
 
     public static String[][] overlayBoard(int newX, int newY, int startX, int startY, String[][] overlay){

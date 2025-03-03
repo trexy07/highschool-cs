@@ -56,16 +56,16 @@ public class Perlinv2 {
 
     private              int[]      mainWind; // how the grid moves
 
-    private              String[][] newWet;
-    private              String[][] newWind;
+    private              String[][] newWater;
+    private              String[][] newCloud;
 
     private              double[][] horizontal; // left or right edge
     private              double[][] vertical;   // top or bottom edge
 
     public Perlinv2(int newX,int newY) { //constructor or __init__ in python
         // constructor receiving size
-        this.sizeX = newX;
-        this.sizeY = newY;
+        sizeX = newX;
+        sizeY = newY;
 
         construct();
     }
@@ -79,8 +79,6 @@ public class Perlinv2 {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-        this.sizeX = sizeX;
-        this.sizeY = sizeY;
 
         construct();
     }
@@ -128,14 +126,14 @@ public class Perlinv2 {
         }
 
         // generate the first frame based on random values - basically the render function
-        newWet = new String[sizeY][sizeX];
-        newWind = new String[sizeY][sizeX];
+        newWater = new String[sizeY][sizeX];
+        newCloud = new String[sizeY][sizeX];
         for (int y = 0; y < sizeY; y++) {
             for (int x = 0; x < sizeX; x++) {
                 if (gridWind[y][x] > MINIMUM_WIND) {
-                    newWind[y][x]= "\033[48;2;" + (int) ((gridWind[y][x] + 1) * 127.5) + ";" + (int) ((gridWind[y][x] + 1) * 127.5) + ";" + (int) ((gridWind[y][x] + 1) * 127.5) + "m  ";
+                    newCloud[y][x]= "\033[48;2;" + (int) ((gridWind[y][x] + 1) * 127.5) + ";" + (int) ((gridWind[y][x] + 1) * 127.5) + ";" + (int) ((gridWind[y][x] + 1) * 127.5) + "m  ";
                 } 
-                newWet[y][x] = "\033[48;2;0;0;" + (int) ((gridWet[y][x] + 1) * 127.5) + "m  ";                
+                newWater[y][x] = "\033[48;2;0;0;" + (int) ((gridWet[y][x] + 1) * 127.5) + "m  ";                
             }
         }
         
@@ -276,24 +274,28 @@ public class Perlinv2 {
     }
 
     private void gridCheck(int x, int y, StringBuilder output){
-        if (newWind[y][x] != null){ // a cloud of null means no clouds
-            output.append(newWind[y][x]);
+        if (newCloud[y][x] != null){ // a cloud of null means no clouds
+            output.append(newCloud[y][x]);
         } else {
-            output.append(newWet[y][x]);
+            output.append(newWater[y][x]);
         }
     }
 
     private void gridCheck(int x, int y, StringBuilder output, String[][] overlay){
-        if (overlay[y][x] == null){
-            if (newWind[y][x] != null){ // a cloud of null means no clouds
-                output.append(newWind[y][x]);
+        // get the overlay where it would be without the window
+        String square = overlay[(y - windowY + sizeY)%sizeY][(x - windowX + sizeX)%sizeX]; 
+        // if there is an overlay, use it, otherwise use the water or cloud normally
+        if (square == null){
+            if (newCloud[y][x] != null){ // a cloud of null means no clouds
+                output.append(newCloud[y][x]);
             } else {
-                output.append(newWet[y][x]);
+                output.append(newWater[y][x]);
             }
         } else{
-            String water=newWet[y][x];
-            water = water.substring(0, water.length()-2);
-            output.append(water+overlay[y][x]);
+            // put the water under the overlay
+            String water=newWater[y][x];
+            water = water.substring(0, water.length()-2);// remove the spaces
+            output.append(water+square);
         }
     }
 
@@ -338,10 +340,10 @@ public class Perlinv2 {
             for (int x = windowX; x < sizeX; x++) {
                 // String square = overlay[y][x];
                 // if (square == null) {
-                //     if (newWind[y][x] != null){ // a cloud of null means no clouds
-                //         output.append(newWind[y][x]);
+                //     if (newCloud[y][x] != null){ // a cloud of null means no clouds
+                //         output.append(newCloud[y][x]);
                 //     } else {
-                //         output.append(newWet[y][x]);
+                //         output.append(newWater[y][x]);
                 //     }
                 // } else {
                 //     output.append(square);
@@ -440,7 +442,7 @@ public class Perlinv2 {
                 total/=36;
                 
                 // set the water noise
-                newWet [i][(windowX + sizeX + (mainWind[0]+1)/2-1) % sizeX] =  "\033[48;2;0;0;" + (int) ((total + 1) * 127.5) + "m  ";
+                newWater [i][(windowX + sizeX + (mainWind[0]+1)/2-1) % sizeX] =  "\033[48;2;0;0;" + (int) ((total + 1) * 127.5) + "m  ";
 
 
                 //average the cloud noise
@@ -455,9 +457,9 @@ public class Perlinv2 {
                 // set the cloud noise
                 String value = ""+(int) ((total + 1) * 127.5);
                 if (total > MINIMUM_WIND){
-                    newWind[i][(windowX + sizeX + (mainWind[0]+1)/2-1) % sizeX] = "\033[48;2;" + value + ";" +value + ";" +value + "m  ";
+                    newCloud[i][(windowX + sizeX + (mainWind[0]+1)/2-1) % sizeX] = "\033[48;2;" + value + ";" +value + ";" +value + "m  ";
                 } else { // null if the cloud is too little
-                    newWind[i][(windowX + sizeX + (mainWind[0]+1)/2-1) % sizeX] = null;
+                    newCloud[i][(windowX + sizeX + (mainWind[0]+1)/2-1) % sizeX] = null;
                 }
             }
             // move the edge noises horizontally
@@ -475,7 +477,7 @@ public class Perlinv2 {
                 total/=36;
 
                 // set the water noise
-                newWind[(windowY + sizeY + (mainWind[1]+1)/2-1) % sizeY][i] = "\033[48;2;0;0;" + (int) ((total + 1) * 127.5) + "m  ";
+                newCloud[(windowY + sizeY + (mainWind[1]+1)/2-1) % sizeY][i] = "\033[48;2;0;0;" + (int) ((total + 1) * 127.5) + "m  ";
 
 
                 //average the cloud noise
@@ -490,9 +492,9 @@ public class Perlinv2 {
                 // set the cloud noise
                 String value = ""+(int) ((total + 1) * 127.5);
                 if (total > MINIMUM_WIND){
-                    newWind[(windowY + sizeY + (mainWind[1]+1)/2-1) % sizeY][i] = "\033[48;2;" + value + ";" +value + ";" +value + "m  ";
+                    newCloud[(windowY + sizeY + (mainWind[1]+1)/2-1) % sizeY][i] = "\033[48;2;" + value + ";" +value + ";" +value + "m  ";
                 } else { // null if the cloud is too little
-                    newWind[(windowY + sizeY + (mainWind[1]+1)/2-1) % sizeY][i] = null;
+                    newCloud[(windowY + sizeY + (mainWind[1]+1)/2-1) % sizeY][i] = null;
                 }   
             }
             // move the edge noises vertically 
