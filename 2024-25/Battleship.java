@@ -125,7 +125,8 @@ public class Battleship {
 
 
         Thread renderingThread     = new Thread(() -> { // render (background) thread
-            Perlinv2      p           = new Perlinv2(sizeX, sizeY-1);
+            // Perlinv2      p           = new Perlinv2(sizeX, sizeY-1);
+            Noise      p           = new Noise(sizeX, sizeY-1);
 
             int         cycleTime   = 0;
             boolean     turn        = true;

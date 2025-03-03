@@ -4,7 +4,7 @@ package drawing;
 import java.util.Random;
 import java.io.IOException;
 
-public class Perlinv2 {
+public class Noise {
 
     private static final double     MINIMUM_WIND = 0.1; // -1 to 1, used to mask the wind
 
@@ -62,7 +62,7 @@ public class Perlinv2 {
     private              double[][] horizontal; // left or right edge
     private              double[][] vertical;   // top or bottom edge
 
-    public Perlinv2(int newX,int newY) { //constructor or __init__ in python
+    public Noise(int newX,int newY) { //constructor or __init__ in python
         // constructor receiving size
         sizeX = newX;
         sizeY = newY;
@@ -70,7 +70,7 @@ public class Perlinv2 {
         construct();
     }
 
-    public Perlinv2() { 
+    public Noise() { 
         // constructor getting size
         try {
             int[] terminalSize = TerminalSize.getTerminalSize(); // import from other file
@@ -214,8 +214,8 @@ public class Perlinv2 {
 
     public static void main(String[] args) { // if __name__ == "__main__" but in java
 
-        // Perlinv2 p = new Perlinv2();
-        Perlinv2 p = new Perlinv2(8, 8);
+        // Noise p = new Noise();
+        Noise p = new Noise(8, 8);
 
         // p.mainWind[0] = -1;
         // p.mainWind[1] = 0;
@@ -233,7 +233,7 @@ public class Perlinv2 {
         // p.mainWind[1] = 0;
 
         // Perlin   p1 = new Perlin();
-        // Perlinv2 p2 = new Perlinv2();
+        // Noise p2 = new Noise();
         // int i =0;
         
         // long startTime = System.nanoTime();
@@ -258,7 +258,7 @@ public class Perlinv2 {
 
 
         // System.out.println("empty: " + emptyDuration);  
-        // System.out.println("Perlin: " + duration1 + " Perlinv2: " + duration2);
+        // System.out.println("Perlin: " + duration1 + " Noise: " + duration2);
         // System.out.println("diff: " + (duration1 - duration2));
         // System.out.println("percent:" + ((double) duration2 / duration1));
     }
