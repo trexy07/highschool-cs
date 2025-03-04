@@ -27,6 +27,102 @@ public class Battleship {
     public  static final int      BLINK_RATE  = 300; // icon blink rate
     public  static final int      RENDER_RATE = 1000;// background move rate
 
+    public  static final Thread renderingThread = new Thread(() -> { // render (background) thread
+        // Perlinv2      p           = new Perlinv2(sizeX, sizeY-1);
+        Noise      p           = new Noise(sizeX, sizeY-1);
+
+        int         cycleTime   = 0;
+        boolean     turn        = true;
+        
+        String[][]  output      = p1.printBoard(true);
+        String[][]  canvas      = Board.overlayBoard(sizeX,sizeY-1,  sizeX / 4 - 5, (sizeY-1) / 2 - 5, output);
+
+        output = p2.printBoard(false);
+        canvas = Board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 5, canvas, output);
+
+
+        while (true) {
+            try   {
+                String prefix;
+                String render;
+                if (sizeY>sizeX/2){ // render vertically 
+                    // H move cursor to top left
+                    // 2j clear screen
+                    // 32m green text
+                    
+                    prefix = "\033[H\033[2J\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Use wasd to move target, then hit enter to fire.\n";
+
+                    output = p1.printBoardName((p1==currentPlayer) ? turn:false);
+                    canvas = Board.overlayBoard(sizeX, sizeY-1, sizeX / 2 - 5, (sizeY-1) / 4 - 6,output);
+
+                    output = p2.printBoardName((p2==currentPlayer) ? turn:false);
+                    canvas = Board.overlayBoard(sizeX / 2 - 5, 3 * (sizeY-1) / 4  - 6, canvas, output);
+                    
+                } else { // render horizontally
+                    // H move cursor to top left
+                    // 2j clear screen
+                    // 32m green text
+                    prefix = "\033[H\033[2J\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Use wasd to move target, then hit enter to fire.\n";
+                    
+                    output = p1.printBoardName((p1==currentPlayer) ? turn:false);
+                    canvas = Board.overlayBoard(sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 6, output);
+
+                    output = p2.printBoardName((p2==currentPlayer) ? turn:false);
+                    canvas = Board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 6, canvas, output);
+
+                    
+
+                }
+
+
+                if (cycleTime % RENDER_RATE == 0)       {
+                    render = p.nextFrame(canvas);
+                    System.out.print(prefix + render.substring(0, render.length()-5)+"\033[0m");
+                    System.out.flush();
+
+                } else if (moved)                       {
+                    render = p.render(canvas);
+                    System.out.print(prefix + render.substring(0, render.length()-5)+"\033[0m");//"
+                    System.out.flush();
+
+
+                } //else if (cycleTime % BLINK_RATE == 0) {
+                //     render = p.render(canvas);
+                //     System.out.print(prefix + render.substring(0, render.length()-5)+"\033[0m");
+                //     System.out.flush();
+
+                // }
+                moved = false;
+
+                cycleTime += CYCLE_DELAY;
+                Thread.sleep(CYCLE_DELAY);
+            } catch (InterruptedException e) {
+                // render one last time
+
+                if (sizeY>sizeX/2){
+                    output = p1.printBoardName(false);
+                    canvas = Board.overlayBoard(sizeX, sizeY-1, sizeX / 2 - 5, (sizeY-1) / 4 - 6,output);
+
+                    output = p2.printBoardName(false);
+                    canvas = Board.overlayBoard(sizeX / 2 - 5, 3 * (sizeY-1) / 4 - 6, canvas, output);
+                } else {
+                    output = p1.printBoardName(false);
+                    canvas = Board.overlayBoard(sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 6, output);
+
+                    output = p2.printBoardName(false);
+                    canvas = Board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 6, canvas, output);
+                }
+
+                String render = p.nextFrame(canvas);
+
+                System.out.print(render.substring(0, render.length()-5)+"\033[0m");
+                System.out.flush();
+                clear=true; // make sure the drawing thread is complete
+                break;
+            }
+        }
+    });
+
     public static void main(String[] args) {
         
         // find terminal size
@@ -39,22 +135,19 @@ public class Battleship {
             e.printStackTrace();
         }
 
+
         // minimum terminal sizes: 44:13 or 11:25 
         if ((sizeX <44 || sizeY < 13 ) && (sizeX < 22 || sizeY<25) ) {
             System.out.println("\033[32mThe Terminal is too small; current size is " + sizeX + ":" + sizeY+ "\nminimum size is 44:13 or 22:25\033[0m");
             return;
         }
 
-        // escape codes before start
-        // ?1000h mouse reporting
-        // ?1006h mouse format
-        // 2j clear screen
-        System.out.print("\033[?1000h\033[?1006h\033[H\033[2J");
-        System.out.flush();
-
-
+        // starting escape codes
+        // H return cursor to top left
+        // 2J clear screen
+        System.out.print("\033[H\033[2J");
         // get player names or skip to debug
-        if ("debug" == "debug") {
+        if ("full" == "debug") {
             try{
                 new File("save.bin").createNewFile();
                 save = new DataOutputStream(new FileOutputStream("save.bin"));
@@ -90,8 +183,11 @@ public class Battleship {
             System.out.println("(input player 1 name)");
 
             String name1 = scan.nextLine(); // Read user input
-            // p1 = new Board(name1);
-            p1 = new Board(name1, save);
+            if (save==null){
+                p1 = new Board(name1);
+            }else{
+                p1 = new Board(name1, save);
+            }
             p1.side(false);
             currentPlayer = p1;
 
@@ -104,9 +200,12 @@ public class Battleship {
             System.out.println("(input player 2 name)");
 
             String name2 = scan.nextLine(); // Read user input
-            // p2 = new Board(name2);
-            p2 = new Board(name2, save);
-            p1.side(true);
+            if (save==null){
+                p2 = new Board(name2);
+            }else{
+                p2 = new Board(name2, save);
+            }
+            p2.side(true);
             otherPlayer = p2;
 
             System.out.print("\033[H\033[2J");
@@ -119,119 +218,29 @@ public class Battleship {
             rollingPrint(" sits unassuming of the looming attack on his ships.\nGeneral " +
                 name1 + " has the advantage to attack first.\nThe harbor is fogged over, General " +
                 name1 + " is tasked with picking targets.\n\n-General " +
-                name1 + "! Input wasd to select target, then hit enter.\n");
+                name1 + "! Use wasd to move target, then hit enter to fire.\n");
         }
 
 
-
-        Thread renderingThread     = new Thread(() -> { // render (background) thread
-            // Perlinv2      p           = new Perlinv2(sizeX, sizeY-1);
-            Noise      p           = new Noise(sizeX, sizeY-1);
-
-            int         cycleTime   = 0;
-            boolean     turn        = true;
-            
-            String[][]  output      = p1.printBoard(true);
-            String[][]  canvas      = Board.overlayBoard(sizeX,sizeY-1,  sizeX / 4 - 5, (sizeY-1) / 2 - 5, output);
-
-            output = p2.printBoard(false);
-            canvas = Board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 5, canvas, output);
-
-
-            while (true) {
-                try   {
-                    String prefix;
-                    String render;
-                    if (sizeY>sizeX/2){ // render vertically 
-                        // H move cursor to top left
-                        // 2j clear screen
-                        // 32m green text
-                        
-                        prefix = "\033[H\033[2J\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Input wasd to select target, then hit enter.\n";
-
-                        output = p1.printBoardName((p1==currentPlayer) ? turn:false);
-                        canvas = Board.overlayBoard(sizeX, sizeY-1, sizeX / 2 - 5, (sizeY-1) / 4 - 6,output);
-
-                        output = p2.printBoardName((p2==currentPlayer) ? turn:false);
-                        canvas = Board.overlayBoard(sizeX / 2 - 5, 3 * (sizeY-1) / 4  - 6, canvas, output);
-                        
-                    } else { // render horizontally
-                        // H move cursor to top left
-                        // 2j clear screen
-                        // 32m green text
-                        prefix = "\033[H\033[2J\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Input wasd to select target, then hit enter.\n";
-                        
-                        output = p1.printBoardName((p1==currentPlayer) ? turn:false);
-                        canvas = Board.overlayBoard(sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 6, output);
-
-                        output = p2.printBoardName((p2==currentPlayer) ? turn:false);
-                        canvas = Board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 6, canvas, output);
-
-                        
-
-                    }
-
-
-                    if (cycleTime % RENDER_RATE == 0)       {
-                        render = p.nextFrame(canvas);
-                        System.out.print(prefix + render.substring(0, render.length()-5)+"\033[0m");
-                        System.out.flush();
-
-                    } else if (moved)                       {
-                        render = p.render(canvas);
-                        System.out.print(prefix + render.substring(0, render.length()-5)+"\033[0m");//"
-                        System.out.flush();
-
-
-                    } //else if (cycleTime % BLINK_RATE == 0) {
-                    //     render = p.render(canvas);
-                    //     System.out.print(prefix + render.substring(0, render.length()-5)+"\033[0m");
-                    //     System.out.flush();
-
-                    // }
-                    moved = false;
-
-                    cycleTime += CYCLE_DELAY;
-                    Thread.sleep(CYCLE_DELAY);
-                } catch (InterruptedException e) {
-                    // render one last time
-
-                    if (sizeY>sizeX/2){
-                        output = p1.printBoardName(false);
-                        canvas = Board.overlayBoard(sizeX, sizeY-1, sizeX / 2 - 5, (sizeY-1) / 4 - 6,output);
-
-                        output = p2.printBoardName(false);
-                        canvas = Board.overlayBoard(sizeX / 2 - 5, 3 * (sizeY-1) / 4 - 6, canvas, output);
-                    } else {
-                        output = p1.printBoardName(false);
-                        canvas = Board.overlayBoard(sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 6, output);
-
-                        output = p2.printBoardName(false);
-                        canvas = Board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 6, canvas, output);
-                    }
-
-                    String render = p.nextFrame(canvas);
-
-                    System.out.print(render.substring(0, render.length()-5)+"\033[0m");
-                    System.out.flush();
-                    clear=true; // make sure the drawing thread is complete
-                    break;
-                }
+        System.out.println("----starting----");
+        if (save!=null){
+            try{
+                save.writeLong(System.currentTimeMillis()); // game start time
+            } catch (IOException e){
+                e.printStackTrace();
             }
-        });
+        }
 
         renderingThread.setDaemon(true);
         renderingThread.start();
 
-        System.out.println("----starting----");
-        try{
-            save.writeLong(System.currentTimeMillis()); // game start time
-        } catch (IOException e){
-            e.printStackTrace();
-        }
+        // escape codes for mouse
+        // ?1000h mouse reporting
+        // ?1006h mouse format
+        System.out.print("\033[?1000h\033[?1006h");
+        System.out.flush();
 
         while (true) { // input (main) thread
-            // System.out.println(hit_miss);
             if (hit_miss == null ){ // game over
                 // System.out.println(clear);
                 if (!clear){ // drawing thread not complete
@@ -246,22 +255,15 @@ public class Battleship {
                     // System.exit(0);
                 }
             }
-            // int key = 0;
-            // try                     {
-            //     key = RawConsoleInput.read(true); // wait or don't wait
-            // } catch (IOException e) {
-            //     e.printStackTrace();
-            // }
-            int key = RawConsoleInput.read(true);
-            // System.out.println("You pressed: " + key);
-            if (key == 3) {
-                // System.out.print("\033[?1000l");
-                // System.out.print("\033[?1006l");
+            
+            int key = RawConsoleInput.read(true); // get the next character
+
+            if (key == 3) {// exit
                 System.out.println("\033[?1000l\033[?1006l\033[0m");
                 break;
             }
-            // System.out.println("You pressed: " + (char) key);
-            // boolean moved=false;
+            
+            
             if (key == 27) { // ESC
                 key = RawConsoleInput.read(true);
                 // System.out.println("escaped");
@@ -309,44 +311,43 @@ public class Battleship {
 
                     }
                 }
-            } else if (key == 'w' ) {
+            } else if (key == 'w' ) { //up
                 currentPlayer.target[0] = Math.max(0, currentPlayer.target[0] - 1);
                 moved = true;
-            } else if (key == 's' ) {
+            } else if (key == 's' ) { // down
                 currentPlayer.target[0] = Math.min(9, currentPlayer.target[0] + 1);
                 moved = true;
-            } else if (key == 'a' ) {
+            } else if (key == 'a' ) { // left
                 currentPlayer.target[1] = Math.max(0, currentPlayer.target[1] - 1);
                 moved = true;
-            } else if (key == 'd' ) {
+            } else if (key == 'd' ) { // right
                 currentPlayer.target[1] = Math.min(9, currentPlayer.target[1] + 1);
                 moved = true;
-            } else if (key == '\n') {
+            } else if (key == '\n') { // shoot
                 hit_miss = currentPlayer.hit(); // attack the player
 
                 if (hit_miss == null){ // current player loses
-                    try {
-                        save.writeByte(127);
-                        save.writeLong(System.currentTimeMillis()); // game end time
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if (save!=null){ // save game end time
+                        try {
+                            save.writeByte(127);
+                            save.writeLong(System.currentTimeMillis()); // game end time
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
-                    System.out.print("\033[?1000l\033[?1006l\033[H\033[2J\033[32m");
-                    // System.out.print("\033[?1000l\033[?1006l\033[32m");
                     
+                    System.out.print("\033[?1000l\033[?1006l\033[H\033[2J\033[32m");
+
+                    // ending message
                     System.out.print("-The "+ (currentPlayer == p1 ? "Japanese" : "American") +" navy was defeated by the general "+ otherPlayer.name +"!\n");
-                    // renderingThread.stop();
-                    renderingThread.interrupt();
-                    // System.out.println("\033[?1000l\033[?1006l\033[0m");
-                    // System.exit(0);
-                    // break;
+
+                    renderingThread.interrupt(); // wait for the other to close
                 }
 
                 // switch players
                 Board temp = currentPlayer;
                 currentPlayer = otherPlayer;
                 otherPlayer = temp;
-
             }
         }
     }

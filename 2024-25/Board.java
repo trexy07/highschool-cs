@@ -502,7 +502,8 @@ public class Board{
             return;
         }
 
-        Perlin p = new Perlin();
+        // Perlin p = new Perlin();
+        Noise p = new Noise();
         
 
         while (true) {
