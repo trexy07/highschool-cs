@@ -218,15 +218,23 @@ public class Board{
     public void setBoard(String locations){
         // locations
         // [   "ship type+ x+y+dir"*5     ]
-        // ship type: 1-5
+        // ship type: 1-5 -- no more ship type
         // x|y: 0-9
         // dir: 0-1
         for(int i = 0; i<5; i++){
         // if (false){ int i = 0;
+            // old mode
             // int type     = (locations.charAt(i*4  )) - '0';
-            int x        = (locations.charAt(i*4+1)) - '0';
-            int y        = (locations.charAt(i*4+2)) - '0';
-            int rotation = (locations.charAt(i*4+3)) - '0';
+            int x        = (locations.charAt(i*3+1)) - '0';
+            int y        = (locations.charAt(i*3+2)) - '0';
+            int rotation = (locations.charAt(i*3+3)) - '0';
+
+            // new mode
+            // int x        = (locations.charAt(i*3)) - '0';
+            // int y        = (locations.charAt(i*3+1)) - '0';
+            // int rotation = (locations.charAt(i*3+2)) - '0';
+
+            // System.out.println(  x+","+y+","+rotation);
             // System.out.println(  String.valueOf(type)+x+y+rotation);
 
             // int length   = type + (type<=2?1:0);
@@ -273,7 +281,7 @@ public class Board{
             }
 
             // record ship placement
-            this.locations[i-1] = (byte)(x + y*10 + rotation*256);
+            this.locations[i] = (byte)(x + y*10 + rotation*256);
         }
 
         // try{
@@ -494,33 +502,36 @@ public class Board{
 
         // System.out.println("\033[38;2;255;215;0m" +"bonjour "+"\033[0m"); //double width
 
-        Board b = new Board("Bob");
-        Board a = new Board("Alice");
+        // Board b = new Board("Bob","1780 2230 3560 4490 5440");
+        Board b = new Board("Bob","780230560490440");
+        // Board b = new Board("Bob","110");
+        // Board a = new Board("Alice");
 
         if (sizeY <= 10){
             System.out.println("Terminal too small "+sizeX+":"+sizeY);
             return;
         }
 
+
         // Perlin p = new Perlin();
-        Noise p = new Noise();
+        // Noise p = new Noise();
         
 
-        while (true) {
-            String[][] output = b.printBoard();
-            String[][] canvas = overlayBoard(sizeX/4-5, sizeY/2-5, output);
+        // while (true) {
+        //     String[][] output = b.printBoard();
+        //     String[][] canvas = overlayBoard(sizeX/4-5, sizeY/2-5, output);
 
-            output = a.printBoard();
-            canvas = overlayBoard(3 * sizeX / 4 - 5, sizeY/2-5, canvas, output);
+        //     output = a.printBoard();
+        //     canvas = overlayBoard(3 * sizeX / 4 - 5, sizeY/2-5, canvas, output);
 
-            System.out.print(p.nextFrame(canvas));
+        //     System.out.print(p.nextFrame(canvas));
 
-            try                              {
-                Thread.sleep(1000); // wait for 1 second
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        //     try                              {
+        //         Thread.sleep(1000); // wait for 1 second
+        //     } catch (InterruptedException e) {
+        //         e.printStackTrace();
+        //     }
+        // }
         // p.loop();
 
         // System.out.println(b.board[0][0]); // should fail because board is private

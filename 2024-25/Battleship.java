@@ -18,7 +18,7 @@ public class Battleship {
     private static       int      sizeX       = 0;
     private static       int      sizeY       = 0;
     private static       int      lineCount   = 0;
-    private static       String   hit_miss    = "";
+    private static       String   hitResult    = "";
     
     private static       boolean  moved       = false;
     private static       boolean  clear       = false;
@@ -26,13 +26,13 @@ public class Battleship {
     public  static final int      CYCLE_DELAY = 100; // responsiveness
     public  static final int      BLINK_RATE  = 300; // icon blink rate
     public  static final int      RENDER_RATE = 1000;// background move rate
-
+    
     public  static final Thread renderingThread = new Thread(() -> { // render (background) thread
         // Perlinv2      p           = new Perlinv2(sizeX, sizeY-1);
-        Noise      p           = new Noise(sizeX, sizeY-1);
+        Noise      p           = new Noise(sizeX, sizeY-1); // background pattern
 
         int         cycleTime   = 0;
-        boolean     turn        = true;
+        boolean     turn        = true; // where to render the target
         
         String[][]  output      = p1.printBoard(true);
         String[][]  canvas      = Board.overlayBoard(sizeX,sizeY-1,  sizeX / 4 - 5, (sizeY-1) / 2 - 5, output);
@@ -43,69 +43,55 @@ public class Battleship {
 
         while (true) {
             try   {
-                String prefix;
                 String render;
-                if (sizeY>sizeX/2){ // render vertically 
-                    // H move cursor to top left
-                    // 2j clear screen
-                    // 32m green text
-                    
-                    prefix = "\033[H\033[2J\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Use wasd to move target, then hit enter to fire.\n";
 
+                // H move cursor to top left
+                // 2j clear screen
+                // 32m green text
+                String prefix = "\033[H\033[2J\033[32m-" + hitResult + " General " + currentPlayer.name + "! Use wasd to move target, then hit enter to fire.\n";
+                    
+                if (sizeY>sizeX/2){ // render vertically 
+                    // render player 1
                     output = p1.printBoardName((p1==currentPlayer) ? turn:false);
                     canvas = Board.overlayBoard(sizeX, sizeY-1, sizeX / 2 - 5, (sizeY-1) / 4 - 6,output);
-
+                    // and player 2
                     output = p2.printBoardName((p2==currentPlayer) ? turn:false);
                     canvas = Board.overlayBoard(sizeX / 2 - 5, 3 * (sizeY-1) / 4  - 6, canvas, output);
                     
                 } else { // render horizontally
-                    // H move cursor to top left
-                    // 2j clear screen
-                    // 32m green text
-                    prefix = "\033[H\033[2J\033[32m-" + hit_miss + " General " + currentPlayer.name + "! Use wasd to move target, then hit enter to fire.\n";
-                    
+                    // render player 1
                     output = p1.printBoardName((p1==currentPlayer) ? turn:false);
                     canvas = Board.overlayBoard(sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 6, output);
-
+                    // and player 2
                     output = p2.printBoardName((p2==currentPlayer) ? turn:false);
                     canvas = Board.overlayBoard(3 * sizeX / 4 - 5, (sizeY-1) / 2 - 6, canvas, output);
-
-                    
-
                 }
 
 
-                if (cycleTime % RENDER_RATE == 0)       {
+                if (cycleTime % RENDER_RATE == 0) { // update the background
                     render = p.nextFrame(canvas);
-                    System.out.print(prefix + render.substring(0, render.length()-5)+"\033[0m");
+                    System.out.print(prefix + render.substring(0, render.length()-5)+"\033[0m"); // skip the last character
                     System.out.flush();
-
-                } else if (moved)                       {
+                    
+                } else if (moved)                 { // just update the boards
                     render = p.render(canvas);
-                    System.out.print(prefix + render.substring(0, render.length()-5)+"\033[0m");//"
+                    System.out.print(prefix + render.substring(0, render.length()-5)+"\033[0m");// skip the last character
                     System.out.flush();
-
-
-                } //else if (cycleTime % BLINK_RATE == 0) {
-                //     render = p.render(canvas);
-                //     System.out.print(prefix + render.substring(0, render.length()-5)+"\033[0m");
-                //     System.out.flush();
-
-                // }
-                moved = false;
+                }
+                moved = false; // board update has been done
 
                 cycleTime += CYCLE_DELAY;
-                Thread.sleep(CYCLE_DELAY);
-            } catch (InterruptedException e) {
+                Thread.sleep(CYCLE_DELAY); // wait for next cycle
+            } catch (InterruptedException e) { // end of game
                 // render one last time
-
-                if (sizeY>sizeX/2){
+                if (sizeY>sizeX/2) { //vertical
                     output = p1.printBoardName(false);
                     canvas = Board.overlayBoard(sizeX, sizeY-1, sizeX / 2 - 5, (sizeY-1) / 4 - 6,output);
 
                     output = p2.printBoardName(false);
                     canvas = Board.overlayBoard(sizeX / 2 - 5, 3 * (sizeY-1) / 4 - 6, canvas, output);
-                } else {
+                    
+                } else             { //horizontal
                     output = p1.printBoardName(false);
                     canvas = Board.overlayBoard(sizeX,sizeY-1,sizeX / 4 - 5, (sizeY-1) / 2 - 6, output);
 
@@ -115,10 +101,10 @@ public class Battleship {
 
                 String render = p.nextFrame(canvas);
 
-                System.out.print(render.substring(0, render.length()-5)+"\033[0m");
+                System.out.print(render.substring(0, render.length()-5)+"\033[0m"); // skip the last character
                 System.out.flush();
                 clear=true; // make sure the drawing thread is complete
-                break;
+                break; // end the thread
             }
         }
     });
@@ -137,7 +123,7 @@ public class Battleship {
 
 
         // minimum terminal sizes: 44:13 or 11:25 
-        if ((sizeX <44 || sizeY < 13 ) && (sizeX < 22 || sizeY<25) ) {
+        if ((sizeX <44 || sizeY < 13 ) && (sizeX < 22 || sizeY<25)) {
             System.out.println("\033[32mThe Terminal is too small; current size is " + sizeX + ":" + sizeY+ "\nminimum size is 44:13 or 22:25\033[0m");
             return;
         }
@@ -215,7 +201,7 @@ public class Battleship {
             System.out.print("The battle ships anchor off the coast of Pearl Harbor, Hawaii.\nGeneral " + name2);
             
             lineCount=8+name2.length();
-            rollingPrint(" sits unassuming of the looming attack on his ships.\nGeneral " +
+            rollingPrint(" sits unaware of the looming attack on their ships.\nGeneral " +
                 name1 + " has the advantage to attack first.\nThe harbor is fogged over, General " +
                 name1 + " is tasked with picking targets.\n\n-General " +
                 name1 + "! Use wasd to move target, then hit enter to fire.\n");
@@ -241,7 +227,7 @@ public class Battleship {
         System.out.flush();
 
         while (true) { // input (main) thread
-            if (hit_miss == null ){ // game over
+            if (hitResult == null ){ // game over
                 // System.out.println(clear);
                 if (!clear){ // drawing thread not complete
                     continue;
@@ -324,9 +310,9 @@ public class Battleship {
                 currentPlayer.target[1] = Math.min(9, currentPlayer.target[1] + 1);
                 moved = true;
             } else if (key == '\n') { // shoot
-                hit_miss = currentPlayer.hit(); // attack the player
+                hitResult = currentPlayer.hit(); // attack the player
 
-                if (hit_miss == null){ // current player loses
+                if (hitResult == null){ // current player loses
                     if (save!=null){ // save game end time
                         try {
                             save.writeByte(127);
