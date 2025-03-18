@@ -15,4 +15,5 @@ Batteship
     │   Perlin.java # averages points
     │   TerminalSize.java # gets size of the terminal
 ```
-run compile.sh with "./compile.sh"
+compile the program with "./compile.sh" <br>
+run the program with "./run.sh"

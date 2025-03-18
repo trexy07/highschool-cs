@@ -13,6 +13,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 // import java.util.Calendar;
 
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+
 public class Server {
     
     // game data
@@ -20,6 +24,7 @@ public class Server {
     private static Map<Integer, Boolean> turns;
     private static Map<Integer, String > hits;
     private static Map<Integer, Integer> activity;
+    private static Map<Integer, DataOutputStream> saves;
     private static ArrayList<Integer>    freeIds;
 
     // server data
@@ -31,6 +36,7 @@ public class Server {
         turns     = new HashMap<>();
         hits      = new HashMap<>();
         activity  = new HashMap<>();
+        saves     = new HashMap<>();
         freeIds   = new ArrayList<>();
         
         // create the server
@@ -45,9 +51,9 @@ public class Server {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                new Handler().age();
+            new Handler().age();
             }
-        }, calendar.getTime(), 24 * 60 * 60 * 1000);
+        }, 0, 24 * 60 * 60 * 1000);
         // }, 0, 5* 1000);  // testing timer
     }
     
@@ -87,11 +93,28 @@ public class Server {
             } else {
                 id = nextId++;
             }
+            DataOutputStream tempSave = null;
+            try{
+                new File(id + ".bin").createNewFile();
+                tempSave= new DataOutputStream(new FileOutputStream(id + ".bin"));
+                saves.put(id,tempSave);
+                // tempSave= new DataOutputStream(new FileOutputStream(id + ".bin"));
+                // saves.put(id,new DataOutputStream(new FileOutputStream(id + ".bin")));
+            } catch (IOException e){
+                System.out.println("File not found");
+            }
 
-            rows    .put(id, new Board[]{ new Board(name,locations),null  });
+            rows    .put(id, new Board[]{ new Board(name,locations,tempSave),null  });
+            // rows    .put(id, new Board[]{ new Board(name,locations),null  });
             turns   .put(id, true);
             hits    .put(id, "");
             activity.put(id, 7);
+
+            
+
+            // save(id, System.currentTimeMillis())
+            // save(id, name);
+
             System.out.println(id +" started");
 
             respond(t,200,id+"");
@@ -121,7 +144,9 @@ public class Server {
                 respond(t,409,"game full");
                 return;
             }
-            rows.get(id)[1] = new Board(name,locations);
+            rows.get(id)[1] = new Board(name,locations,saves.get(id));
+            // rows.get(id)[1] = new Board(name,locations);
+            saveTime(id, System.currentTimeMillis());
 
             respond(t,200,"joined");
             return;
@@ -202,6 +227,9 @@ public class Server {
             // change the turn
             turns.put(id, !turns.get(id));
 
+
+            saves.get(id).write(  y*10+x); // saves hit locations
+
             respond(t, 200, hit);
         }
 
@@ -256,6 +284,27 @@ public class Server {
                 }
             }
         }
+        public void saveTime(int id, long data){
+            try{
+                saves.get(id).writeLong(data); // game start time
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+        } 
+        // public void save(int id, int data){
+        //     try{
+        //         saves.get(id).write(data); // game start time
+        //     } catch (IOException e){
+        //         e.printStackTrace();
+        //     }
+        // } 
+        // public void save(int id, String data){
+        //     try{
+        //         saves.get(id).writeBytes(data); // game start time
+        //     } catch (IOException e){
+        //         e.printStackTrace();
+        //     }
+        // } 
     }
     
     public static Map<String, String> arguments(HttpExchange t){
