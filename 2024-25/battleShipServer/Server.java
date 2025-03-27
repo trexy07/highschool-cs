@@ -1,6 +1,7 @@
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.List;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -11,10 +12,14 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import java.nio.charset.StandardCharsets;
+
 // import java.util.Calendar;
 
 import java.io.DataOutputStream;
 import java.io.File;
+import java.nio.file.Files;
 import java.io.FileOutputStream;
 
 public class Server {
@@ -24,8 +29,11 @@ public class Server {
     private static Map<Integer, Boolean> turns;
     private static Map<Integer, String > hits;
     private static Map<Integer, Integer> activity;
-    private static Map<Integer, DataOutputStream> saves;
     private static ArrayList<Integer>    freeIds;
+
+    private static Map<Integer, DataOutputStream> saves;
+    private static DataOutputStream save;
+    private static DataOutputStream open;
 
     // server data
     private static int                   nextId = 0;
@@ -36,14 +44,125 @@ public class Server {
         turns     = new HashMap<>();
         hits      = new HashMap<>();
         activity  = new HashMap<>();
-        saves     = new HashMap<>();
         freeIds   = new ArrayList<>();
+
+        saves     = new HashMap<>();
+
+        File saveFile = new File("save.bin");
+        if (!saveFile.exists()) {
+            saveFile.createNewFile();
+        }
+        save = new DataOutputStream(new FileOutputStream("save.bin", true));
+
+        
+        File folder = new File("saves");
+        if (!folder.exists() ) {
+            folder.mkdir();
+        }
+        int max = 0;
+        for (File file : folder.listFiles()) {
+            if (file.isFile()) {
+                System.out.println(file.getName());
+                int id = Integer.parseInt(file.getName().split("\\.")[0]);
+                if (id > max) {
+                    max = id;
+                }
+                // saves.put(id, new DataOutputStream(new FileOutputStream("saves/" + id + ".bin", true)));
+                
+
+                // String savedData = new String(Files.readAllBytes(file.toPath()),StandardCharsets.US_ASCII);
+                byte[] savedData = Files.readAllBytes(file.toPath());
+                // List<byte[]> segments = new ArrayList<>();
+
+
+                // List<Byte>[] segments = new ArrayList[6];
+                List<Byte[]> segments = new ArrayList<>();
+                
+                List<Byte> temp = new ArrayList<>();
+                int i =0;
+                for (byte b : savedData) {
+                    if (b == 124) {
+                        // System.out.println(temp.toArray(new Byte[6]).getClass());
+                        segments.add(temp.toArray(new Byte[6]));
+                        
+                        temp.clear();
+                    
+                        // byte[] segment = new byte[segments.size()];
+                        // for (int i = 0; i < segments.size(); i++) {
+                        //     segment[i] = segments.get(i);
+                        // }
+                        // segments.add(segment);
+                    } else {
+                        // temp.add(b);
+                        temp.add((Byte) b);
+                        // System.out.println(b);
+                    }
+                }
+
+                for (Byte[] segment : segments) {
+                    // for (Byte b : segment) {
+                    //     System.out.println(b);
+                    // }
+                    System.out.println(segment);
+                }
+
+                String name1= new String(segments.get(0),StandardCharsets.US_ASCII);
+                String name2= new String(segments.get(2),StandardCharsets.US_ASCII);
+
+                
+
+
+                // System.out.println(savedData);
+                // String[] data = savedData.split("\\|");
+                // // byte[][] data = new byte[][];
+                
+
+                // System.out.println(data[0]);
+                // String ships = data[1];
+                // for (int i = 0; i <5; i++) {
+                //     // System.out.println(ships.charAt(i));
+                //     byte value = (byte) ships.charAt(i);
+                //     // System.out.println(value);  //87  (8,9) -> -3 
+                //     char c = ships.charAt(i);
+                //     System.out.println("Character: " + c);
+                //     System.out.println("Unicode value: " + (int) c);
+                //     System.out.println("Byte value: " + (byte) c);
+                    
+                //     // int signedValue = value & 0xFF; // unsigned
+                //     int signedValue = value;
+
+                //     // reverse storage operation
+                //     int rotation = signedValue / 128;
+                //     int remainder = signedValue % 128;
+                //     int y = remainder / 10;
+                //     int x = remainder % 10;
+                //     System.out.println("x: " + x);
+                //     System.out.println("y: " + y);
+                //     System.out.println("rotation: " + rotation);
+                // }
+                
+                // Board A new Board(data[0], data[1], saves.get(id));
+                // Board b new Board(data[2], data[3], saves.get(id));
+
+
+
+            }
+        } 
+        for (int i = 0; i <= max; i++) {
+            if (!rows.containsKey(i)) {
+                freeIds.add(i);
+            }
+        }
+
         
         // create the server
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
-        server.createContext("/", new Handler());
+        Handler handler = new Handler();
+        server.createContext("/", handler);
         server.setExecutor(null); // creates a default executor
         server.start();
+
+        
 
 
         Timer timer = new Timer();
@@ -60,20 +179,27 @@ public class Server {
     static class Handler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
-            String path = t.getRequestURI().getPath();
-            if        (path.equals("/start"  )) {
-                handleStart(t);
-            } else if (path.equals("/join"   )) {
-                handleJoin(t);
-            } else if (path.equals("/hit"    )) {
-                handleHit(t);
-            } else if (path.equals("/receive")) {
-                handleReceive(t);
-            } else                              {
-                System.out.println("no endpoint: " + path);
-                respond(t,404,"no endpoint: " + path);
+            try{
+                String path = t.getRequestURI().getPath();
+                if        (path.equals("/start"  )) {
+                    handleStart(t);
+                } else if (path.equals("/join"   )) {
+                    handleJoin(t);
+                } else if (path.equals("/hit"    )) {
+                    handleHit(t);
+                } else if (path.equals("/receive")) {
+                    handleReceive(t);
+                } else                              {
+                    System.out.println("no endpoint: " + path);
+                    respond(t,404,"no endpoint: " + path);
+                }
+            } catch (Exception e) {
+                System.out.println("serverFaultInside");
+                e.printStackTrace();
+                System.exit(1);
             }
         }   
+
 
         //https://3bxtl7v5-8000.usw3.devtunnels.ms/start?name=jeff&locations=17802230356044905440
         public void handleStart(HttpExchange t) throws IOException{
@@ -95,11 +221,11 @@ public class Server {
             }
             DataOutputStream tempSave = null;
             try{
-                new File(id + ".bin").createNewFile();
-                tempSave= new DataOutputStream(new FileOutputStream(id + ".bin"));
+                new File("saves/" + id + ".bin").createNewFile();
+                tempSave= new DataOutputStream(new FileOutputStream("saves/" + id + ".bin"));
                 saves.put(id,tempSave);
-                // tempSave= new DataOutputStream(new FileOutputStream(id + ".bin"));
-                // saves.put(id,new DataOutputStream(new FileOutputStream(id + ".bin")));
+                // tempSave= new DataOutputStream(new FileOutputStream("saves/" + id + ".bin"));
+                // saves.put(id,new DataOutputStream(new FileOutputStream("saves/" + id + ".bin")));
             } catch (IOException e){
                 System.out.println("File not found");
             }
@@ -208,6 +334,19 @@ public class Server {
             String  hit = row[player?1:0].hit(x,y); // get the location it hit
             if (hit == null){
                 activity.put(id, 0);
+                save.write(id);
+                save.write(124);
+                // Files.readAllBytes(id+".bin"), "utf-8")
+
+                // Files.readAllBytes(id+".bin");
+                File previousSave =new File("saves/" + id + ".bin");
+                byte[] savedData = Files.readAllBytes(previousSave.toPath());
+                save.write(savedData);
+                // save.writeBytes(String();
+                save.write(y*10+x); // saves last hit location
+                save.write(124);
+                // saveTime(id, System.currentTimeMillis());
+                save.write(126);
                 respond(t,410,"game over (just won)");
                 return;
             } 
@@ -228,7 +367,7 @@ public class Server {
             turns.put(id, !turns.get(id));
 
 
-            saves.get(id).write(  y*10+x); // saves hit locations
+            // saves.get(id).write(  y*10+x); // saves hit locations // already done in the Board class
 
             respond(t, 200, hit);
         }

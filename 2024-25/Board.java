@@ -73,7 +73,7 @@ public class Board{
             e.printStackTrace();
         }
         this.setBoard();
-
+        this.ships = AMERICAN;
     }
 
     public Board(String name, DataOutputStream save){
@@ -82,9 +82,9 @@ public class Board{
         
         try{
             this.save.writeBytes(name);
-            this.save.write(127);
+            this.save.write(124);
             this.save.write(this.locations);//(char[])
-            this.save.write(127);
+            this.save.write(124);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -103,7 +103,7 @@ public class Board{
         sizeX = 10;
         sizeY = 10;
         this.setBoard(locations);
-
+        this.ships = AMERICAN;
     }
 
     public Board(String name, String locations, DataOutputStream save){
@@ -112,9 +112,9 @@ public class Board{
         
         try{
             this.save.writeBytes(name);
-            this.save.write(127);
+            this.save.write(124);
             this.save.write(this.locations);
-            this.save.write(127);
+            this.save.write(124);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -207,7 +207,7 @@ public class Board{
                 }
 
                 // record ship placement
-                this.locations[i-1] = (byte)(x + y*10 + rotation*256);
+                this.locations[i-1] = (byte)(x + y*10 + rotation*-128);
 
             }
 
@@ -225,14 +225,14 @@ public class Board{
         // if (false){ int i = 0;
             // old mode
             // int type     = (locations.charAt(i*4  )) - '0';
-            int x        = (locations.charAt(i*3+1)) - '0';
-            int y        = (locations.charAt(i*3+2)) - '0';
-            int rotation = (locations.charAt(i*3+3)) - '0';
+            // int x        = (locations.charAt(i*4+1)) - '0';
+            // int y        = (locations.charAt(i*4+2)) - '0';
+            // int rotation = (locations.charAt(i*4+3)) - '0';
 
             // new mode
-            // int x        = (locations.charAt(i*3)) - '0';
-            // int y        = (locations.charAt(i*3+1)) - '0';
-            // int rotation = (locations.charAt(i*3+2)) - '0';
+            int x        = (locations.charAt(i*3)) - '0';
+            int y        = (locations.charAt(i*3+1)) - '0';
+            int rotation = (locations.charAt(i*3+2)) - '0';
 
             // System.out.println(  x+","+y+","+rotation);
             // System.out.println(  String.valueOf(type)+x+y+rotation);
@@ -263,8 +263,8 @@ public class Board{
                 }
                 
             }
-            if (fail){
-                System.out.println("fail");
+            if (fail){ // ship placement invalid
+                System.out.println("placement fail");
                 return;
             }
 
@@ -281,7 +281,10 @@ public class Board{
             }
 
             // record ship placement
-            this.locations[i] = (byte)(x + y*10 + rotation*256);
+            // System.out.println(x + y*10);
+            // System.out.println(rotation);
+            // System.out.println(x + y*10 + rotation*-128);
+            this.locations[i] = (byte)(x + y*10 + rotation*-128);
         }
 
         // try{

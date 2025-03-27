@@ -315,7 +315,7 @@ public class Battleship {
                 if (hitResult == null){ // current player loses
                     if (save!=null){ // save game end time
                         try {
-                            save.writeByte(127);
+                            save.writeByte(124);
                             save.writeLong(System.currentTimeMillis()); // game end time
                         } catch (IOException e) {
                             e.printStackTrace();

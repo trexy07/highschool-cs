@@ -10,24 +10,33 @@ import java.nio.charset.StandardCharsets;
 
 
 class ServerTest {
+    public static int[][] targets ={{4,4},{5,4},{6,4},{7,4},{8,4},   {4,9},{5,9},{6,9},{7,9}    ,{5,6},{6,6},{7,6}    ,{2,3},{3,3},{4,3}   ,{7,8},{8,8}};
+
     public static void main(String[] args) {
         try                  {
             Server.main(args);
             Thread.sleep(1000);
         }catch (Exception e) {
+            System.out.println("serverFault");
             e.printStackTrace();
             System.exit(1);
         }
+        //17802230356044905440
         // start
-        String[] res=sendRequest("http://localhost:8000/start?name=jeff&locations=17802230356044905440");
+        // 780 230 560 490 440
+        // 780230560490440
+        // 781230560490440
+        // 440 490 560 230 780
+        // sent as 5 x (X + Y + rotation bit )
+        String[] res=sendRequest("http://localhost:8000/start?name=jeff&locations=780241560490440");
         System.out.println(res[1]);
 
         // join
-        res=sendRequest("http://localhost:8000/join?id=0&name=not%20jeff&locations=17802230356044905440");
+        res=sendRequest("http://localhost:8000/join?id=0&name=not%20jeff&locations=780230560490440");
         System.out.println(res[1]);
 
         // bonus join (409)
-        res=sendRequest("http://localhost:8000/join?id=0&name=not%20jeff&locations=17802230356044905440");
+        res=sendRequest("http://localhost:8000/join?id=0&name=not%20jeff&locations=780230560490440");
         System.out.println(res[1]);
 
         // get data
@@ -51,6 +60,18 @@ class ServerTest {
         System.out.println(res[1]);
 
 
+        // hit loop
+        int i =0;
+        for (int[] target : targets) {
+            res=sendRequest("http://localhost:8000/hit?id=0&player=F&x="+target[0]+"&y="+target[1]);
+            System.out.println(res[1]);
+            res=sendRequest("http://localhost:8000/hit?id=0&player=T&x="+target[0]+"&y="+target[1]);
+            System.out.println(res[1]);
+        }
+        
+        
+
+
         System.exit(0);
     }
     
@@ -70,7 +91,7 @@ class ServerTest {
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod(method);
 
-            int responseCode = connection.getResponseCode(); // reciving
+            int responseCode = connection.getResponseCode(); // receiving
             result[0] = String.valueOf(responseCode);
 
 
