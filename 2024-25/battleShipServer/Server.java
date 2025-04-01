@@ -26,6 +26,7 @@ public class Server {
     
     // game data
     private static Map<Integer, Board[]> rows;
+    // public static  Map<Integer, Board[]> rows;
     private static Map<Integer, Boolean> turns;
     private static Map<Integer, String > hits;
     private static Map<Integer, Integer> activity;
@@ -37,6 +38,8 @@ public class Server {
 
     // server data
     private static int                   nextId = 0;
+
+    public static HttpServer server;
 
     public static void main(String[] args) throws Exception {
         // data for each running game
@@ -59,7 +62,7 @@ public class Server {
         if (!folder.exists() ) {
             folder.mkdir();
         }
-        int max = 0;
+        int max = -1;
         for (File file : folder.listFiles()) {
             if (file.isFile()) {
                 System.out.println(file.getName());
@@ -71,20 +74,26 @@ public class Server {
                 
 
                 // String savedData = new String(Files.readAllBytes(file.toPath()),StandardCharsets.US_ASCII);
+                // saveData.split("\\|");
                 byte[] savedData = Files.readAllBytes(file.toPath());
                 // List<byte[]> segments = new ArrayList<>();
 
 
                 // List<Byte>[] segments = new ArrayList[6];
-                List<Byte[]> segments = new ArrayList<>();
+                List<byte[]> segments = new ArrayList<>();
                 
                 List<Byte> temp = new ArrayList<>();
-                int i =0;
+                
                 for (byte b : savedData) {
-                    if (b == 124) {
+                    if (b == 127) {
                         // System.out.println(temp.toArray(new Byte[6]).getClass());
-                        segments.add(temp.toArray(new Byte[6]));
-                        
+                        // segments.add(temp.toArray(new byte[6]));
+                        byte[] segment = new byte[temp.size()];
+                        for (int i = 0; i < temp.size(); i++) {
+                            segment[i] = temp.get(i);
+                        }
+                        segments.add(segment);
+
                         temp.clear();
                     
                         // byte[] segment = new byte[segments.size()];
@@ -99,55 +108,85 @@ public class Server {
                     }
                 }
 
-                for (Byte[] segment : segments) {
-                    // for (Byte b : segment) {
-                    //     System.out.println(b);
-                    // }
-                    System.out.println(segment);
+                byte[] tempSegment = new byte[temp.size()];
+                for (int i = 0; i < temp.size(); i++) {
+                    tempSegment[i] = temp.get(i);
+                }
+                segments.add(tempSegment);
+
+                System.out.println(segments.size());
+                if (segments.size() != 6) {
+                    System.out.println("corrupt save file");
+                    continue;
                 }
 
                 String name1= new String(segments.get(0),StandardCharsets.US_ASCII);
                 String name2= new String(segments.get(2),StandardCharsets.US_ASCII);
 
+                String[] ships= new String[2];
+                for (int s =1; s<4; s+=2) {
+                    byte[] segment = segments.get(s);
+                    ships[(s-1)/2] = "";
+                    for (int i = 0; i <5; i++) {
+                        int rotation = (segment[i] < 0) ? 1 : 0;
+
+                        // remove rotation bit
+                        int value = segment[i] - (rotation * -128);
+
+                        // get x and y
+                        int y = value / 10;
+                        int x = value % 10;
+
+                        
+                        // System.out.println("x: " + x);
+                        // System.out.println("y: " + y);
+                        // System.out.println("rot: " + rotation);
+                        ships[(s-1)/2] += x +""+ y +""+ rotation;
+                    }
+                }
+                System.out.println(ships[0]);
+                System.out.println(ships[1]);
                 
+                DataOutputStream thisSave = new DataOutputStream(new FileOutputStream("saves/" + id + ".bin", true));
+                // Board A = new Board(data[0], data[1], thisSave);
+                // Board b = new Board(data[2], data[3], thisSave);
+
+                Board american = new Board(name1, ships[0]);
+                Board japan    = new Board(name2, ships[1]);
+
+                int i=0;
+                for (byte b : segments.get(5)){
+                    // System.out.println(b);
+                    // System.out.println(b%10+", "+b/10);
+                    hits.put(i,  i%2==0 ? american.hit(b%10,b/10) : japan.hit(b%10,b/10));
+                    // swap between players and hit
+                    i++;
+                }
+
+                rows.put(id, new Board[]{ american, japan });
+                turns.put(id, i%2==0);
+                // hits      = new HashMap<>();
+                activity.put(id, 7);
+                // freeIds   = new ArrayList<>();
+
+                saves.put(id, thisSave);
+                american.save = thisSave;
+                japan.save   = thisSave;
 
 
-                // System.out.println(savedData);
-                // String[] data = savedData.split("\\|");
-                // // byte[][] data = new byte[][];
-                
+                // a.save = thisSave;//put saves back
+                // b.save = thisSave;
 
-                // System.out.println(data[0]);
-                // String ships = data[1];
-                // for (int i = 0; i <5; i++) {
-                //     // System.out.println(ships.charAt(i));
-                //     byte value = (byte) ships.charAt(i);
-                //     // System.out.println(value);  //87  (8,9) -> -3 
-                //     char c = ships.charAt(i);
-                //     System.out.println("Character: " + c);
-                //     System.out.println("Unicode value: " + (int) c);
-                //     System.out.println("Byte value: " + (byte) c);
-                    
-                //     // int signedValue = value & 0xFF; // unsigned
-                //     int signedValue = value;
+                // saves.put(id, new DataOutputStream(new FileOutputStream("saves/" + id + ".bin", true)));
+                // saves.put(id, thisSave);
 
-                //     // reverse storage operation
-                //     int rotation = signedValue / 128;
-                //     int remainder = signedValue % 128;
-                //     int y = remainder / 10;
-                //     int x = remainder % 10;
-                //     System.out.println("x: " + x);
-                //     System.out.println("y: " + y);
-                //     System.out.println("rotation: " + rotation);
-                // }
-                
-                // Board A new Board(data[0], data[1], saves.get(id));
-                // Board b new Board(data[2], data[3], saves.get(id));
 
 
 
             }
         } 
+        nextId=max+1;
+        System.out.println("max id: " + max);
         for (int i = 0; i <= max; i++) {
             if (!rows.containsKey(i)) {
                 freeIds.add(i);
@@ -156,7 +195,7 @@ public class Server {
 
         
         // create the server
-        HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
+        server = HttpServer.create(new InetSocketAddress(8000), 0);
         Handler handler = new Handler();
         server.createContext("/", handler);
         server.setExecutor(null); // creates a default executor
@@ -332,22 +371,37 @@ public class Server {
             
             // System.out.println(row[player?1:0].name); // enemy name check
             String  hit = row[player?1:0].hit(x,y); // get the location it hit
-            if (hit == null){
+            // if (hit == null){
+            if (hit.charAt(0)=='1'){ // game over
                 activity.put(id, 0);
+
                 save.write(id);
-                save.write(124);
+                save.write(127);
                 // Files.readAllBytes(id+".bin"), "utf-8")
 
                 // Files.readAllBytes(id+".bin");
+                
+                // save.writeBytes(String();
+                // save.write(y*10+x); // saves last hit location
+                // saves.get(id).write(127);
+                // saves.get(id).writeLong(System.currentTimeMillis());
+
+                // saveTime(id, System.currentTimeMillis());
+
                 File previousSave =new File("saves/" + id + ".bin");
                 byte[] savedData = Files.readAllBytes(previousSave.toPath());
                 save.write(savedData);
-                // save.writeBytes(String();
-                save.write(y*10+x); // saves last hit location
-                save.write(124);
-                // saveTime(id, System.currentTimeMillis());
-                save.write(126);
-                respond(t,410,"game over (just won)");
+
+                saves.remove(id);
+                // previousSave.delete();
+
+                // save.write();
+                
+                save.write(127);
+                save.writeLong(System.currentTimeMillis());
+
+                save.write(255);
+                respond(t,410,hit + "game over (just won)");
                 return;
             } 
             activity.put(id, 7);
@@ -426,6 +480,7 @@ public class Server {
         public void saveTime(int id, long data){
             try{
                 saves.get(id).writeLong(data); // game start time
+                saves.get(id).write(127);
             } catch (IOException e){
                 e.printStackTrace();
             }

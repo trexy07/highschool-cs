@@ -18,7 +18,7 @@ public class Battleship {
     private static       int      sizeX       = 0;
     private static       int      sizeY       = 0;
     private static       int      lineCount   = 0;
-    private static       String   hitResult    = "";
+    private static       String   hitResult    = "0";
     
     private static       boolean  moved       = false;
     private static       boolean  clear       = false;
@@ -48,7 +48,7 @@ public class Battleship {
                 // H move cursor to top left
                 // 2j clear screen
                 // 32m green text
-                String prefix = "\033[H\033[2J\033[32m-" + hitResult + " General " + currentPlayer.name + "! Use wasd to move target, then hit enter to fire.\n";
+                String prefix = "\033[H\033[2J\033[32m-" + hitResult.substring(1) + " General " + currentPlayer.name + "! Use wasd to move target, then hit enter to fire.\n";
                     
                 if (sizeY>sizeX/2){ // render vertically 
                     // render player 1
@@ -227,8 +227,9 @@ public class Battleship {
         System.out.flush();
 
         while (true) { // input (main) thread
-            if (hitResult == null ){ // game over
-                // System.out.println(clear);
+            // if (hitResult == null ){ // game over
+            if (hitResult.charAt(0)=='1'){ // game over
+                    // System.out.println(clear);
                 if (!clear){ // drawing thread not complete
                     continue;
                 } else { // drawing thread complete; ending
@@ -312,10 +313,11 @@ public class Battleship {
             } else if (key == '\n') { // shoot
                 hitResult = currentPlayer.hit(); // attack the player
 
-                if (hitResult == null){ // current player loses
-                    if (save!=null){ // save game end time
+                // if (hitResult == null){ // current player loses
+                if (hitResult.charAt(0)=='1'){ // current player loses
+                        if (save!=null){ // save game end time
                         try {
-                            save.writeByte(124);
+                            save.writeByte(127);
                             save.writeLong(System.currentTimeMillis()); // game end time
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -325,7 +327,7 @@ public class Battleship {
                     System.out.print("\033[?1000l\033[?1006l\033[H\033[2J\033[32m");
 
                     // ending message
-                    System.out.print("-The "+ (currentPlayer == p1 ? "Japanese" : "American") +" navy was defeated by the general "+ otherPlayer.name +"!\n");
+                    System.out.print(hitResult.substring(1)+"-The "+ (currentPlayer == p1 ? "Japanese" : "American") +" navy was defeated by the general "+ otherPlayer.name +"!\n");
 
                     renderingThread.interrupt(); // wait for the other to close
                 }

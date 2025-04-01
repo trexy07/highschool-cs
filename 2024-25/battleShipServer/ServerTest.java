@@ -10,7 +10,8 @@ import java.nio.charset.StandardCharsets;
 
 
 class ServerTest {
-    public static int[][] targets ={{4,4},{5,4},{6,4},{7,4},{8,4},   {4,9},{5,9},{6,9},{7,9}    ,{5,6},{6,6},{7,6}    ,{2,3},{3,3},{4,3}   ,{7,8},{8,8}};
+    // public static int[][] targets ={{4,4},{5,4},{6,4},{7,4},{8,4},   {4,9},{5,9},{6,9},{7,9}    ,{5,6},{6,6},{7,6}    ,{2,3},{3,3},{4,3}   ,{7,8},{8,8}};
+    public static int[][] targets ={{4,4},{5,4},{6,4},{7,4},{8,4},   {4,9},{5,9},{6,9},{7,9}    ,{5,6},{6,6},{7,6}    ,{2,3},{3,3},{4,3}   ,{7,8}};
 
     public static void main(String[] args) {
         try                  {
@@ -28,7 +29,7 @@ class ServerTest {
         // 781230560490440
         // 440 490 560 230 780
         // sent as 5 x (X + Y + rotation bit )
-        String[] res=sendRequest("http://localhost:8000/start?name=jeff&locations=780241560490440");
+        String[] res=sendRequest("http://localhost:8000/start?name=jeff&locations=780230560490440");
         System.out.println(res[1]);
 
         // join
@@ -55,9 +56,9 @@ class ServerTest {
         res=sendRequest("http://localhost:8000/hit?id=0&player=F&x=7&y=8");
         System.out.println(res[1]);
 
-        // re-hit (208, random hit)
+        // re-hit (208, random hit) //already hit 8,9 -miss :( at 1,2 -?
         res=sendRequest("http://localhost:8000/hit?id=0&player=T&x=7&y=8");
-        System.out.println(res[1]);
+        System.out.println("random"+res[1]);
 
 
         // hit loop
@@ -69,7 +70,34 @@ class ServerTest {
             System.out.println(res[1]);
         }
         
+        // for (int x : Server.rows.get(0)[0].hits ){
+        //     System.out.print(x + " ");
+        // }
         
+        //restart server to test volatility 
+        Server.server.stop(1);
+        System.out.println("server closed");
+        // Server.main(args);
+        try                  {
+            Server.main(args);
+            Thread.sleep(1000);
+        }catch (Exception e) {
+            System.out.println("serverFault");
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        // for (int x : Server.rows.get(0)[0].hits ){
+        //     System.out.print(x + " ");
+        // }
+
+        res=sendRequest("http://localhost:8000/hit?id=0&player=F&x=8&y=8");
+        System.out.println(res[1]);
+        res=sendRequest("http://localhost:8000/hit?id=0&player=T&x=8&y=8");
+        System.out.println(res[1]);
+        
+        
+    
 
 
         System.exit(0);

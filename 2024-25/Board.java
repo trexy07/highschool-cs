@@ -82,9 +82,9 @@ public class Board{
         
         try{
             this.save.writeBytes(name);
-            this.save.write(124);
+            this.save.write(127);
             this.save.write(this.locations);//(char[])
-            this.save.write(124);
+            this.save.write(127);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -112,9 +112,9 @@ public class Board{
         
         try{
             this.save.writeBytes(name);
-            this.save.write(124);
+            this.save.write(127);
             this.save.write(this.locations);
-            this.save.write(124);
+            this.save.write(127);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -437,7 +437,7 @@ public class Board{
                 y = (int) (Math.random() * 10);
             }
             // prefix = "already hit; firing at "+ (this.target[1]+1) + ","   + (this.target[0]+1)+" -";
-            prefix = "already hit "+ (this.target[1]+1) + "," + (this.target[0]+1) + " -";
+            prefix = "already hit "+ (this.target[1]) + "," + (this.target[0]) + " -";
             // System.out.println("Random hit: "+x+" "+y);
             this.target[0]=y;this.target[1]=x;
             this.board[y][x] =this.board[y][x].substring(0,1)+"1";
@@ -448,6 +448,7 @@ public class Board{
         if (save!=null)
             try{
                 this.save.write(this.target[0]*10+this.target[1]); // save hit to file
+                this.save.flush();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -468,11 +469,14 @@ public class Board{
         for(int hit:hits){ //check if all ships are sunk
             if (hit!=0){ // game not over
                 // return prefix + ( this.board[this.target[0]][this.target[1]].charAt(0) =='0' ? "miss :( " :  "hit :) ") // calculate hit or miss
-                return prefix // message to player/s
-                + "at " + (this.target[1]) + ","   + (this.target[0]) +" -";// report x&y position
+                return "0"+ prefix // message to player/s
+                + "at " + (this.target[1]) + ","   + (this.target[0]) +" ";// report x&y position
             }
         }
-        return null; // game over
+        // return null; // game over
+
+        return "1"+ prefix // message to player/s
+        + "at " + (this.target[1]) + ","   + (this.target[0]) +" ";// report x&y position
 
         // if (hits==0){ // game over
         // // if (hits==5+4+3+3+1){ // short cut
