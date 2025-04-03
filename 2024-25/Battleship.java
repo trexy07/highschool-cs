@@ -133,7 +133,7 @@ public class Battleship {
         // 2J clear screen
         System.out.print("\033[H\033[2J");
         // get player names or skip to debug
-        if ("full" == "debug") {
+        if ("debug" == "debug") {
             try{
                 new File("save.bin").createNewFile();
                 save = new DataOutputStream(new FileOutputStream("save.bin"));
@@ -144,8 +144,8 @@ public class Battleship {
             p2   = new Board("player2",save);
             currentPlayer = p1;
             otherPlayer = p2;
-            p1.side(false);
-            p2.side(true);
+            p1.side(true);
+            p2.side(false);
 
         } else               { // player names
             Scanner scan = new Scanner(System.in); // Create a Scanner obj
@@ -174,7 +174,7 @@ public class Battleship {
             }else{
                 p1 = new Board(name1, save);
             }
-            p1.side(false);
+            p1.side(true);
             currentPlayer = p1;
 
             System.out.print("\033[H\033[2J");
@@ -191,7 +191,7 @@ public class Battleship {
             }else{
                 p2 = new Board(name2, save);
             }
-            p2.side(true);
+            p2.side(false);
             otherPlayer = p2;
 
             System.out.print("\033[H\033[2J");
@@ -234,7 +234,7 @@ public class Battleship {
                     continue;
                 } else { // drawing thread complete; ending
                 // System.out.println("breaking");
-                    System.out.println("\n\033[32m-The "+ (currentPlayer != p1 ? "Japanese" : "American") +" navy was defeated by the general "+ currentPlayer.name +"!\033[0m");
+                    System.out.println("\n\033[32m-The "+ (currentPlayer != p1 ? "American" : "Japanese") +" navy was defeated by the general "+ otherPlayer.name +"!\033[0m");
 
                     System.out.flush();
                     break;
@@ -285,14 +285,42 @@ public class Battleship {
                         } else{ // horizontal clicking
                             // offset the points to click
                             x = (data[1]+1)/2 - sizeX * (p1 == currentPlayer?1:3)/4 + 3;
-                            y = data[2] - sizeY/2 + 2;
+                            y = data[2] - sizeY/2 + 3;
                         }
 
                         // System.out.println(0 <= x && x <= 9 && 0 <= y && y <= 9);
                         if (0 <= x && x <= 9 && 0 <= y && y <= 9){
                             // System.out.println("click confirmed");
-                            currentPlayer.target[1] = x;
-                            currentPlayer.target[0] = y;
+                            if (currentPlayer.target[1] ==x && currentPlayer.target[0]==y){ // double click to attack
+                                hitResult = currentPlayer.hit(); // attack the player
+
+                                // if (hitResult == null){ // current player loses
+                                if (hitResult.charAt(0)=='1'){ // current player loses
+                                        if (save!=null){ // save game end time
+                                        try {
+                                            save.writeByte(127);
+                                            save.writeLong(System.currentTimeMillis()); // game end time
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                    
+                                    System.out.print("\033[?1000l\033[?1006l\033[H\033[2J\033[32m");
+
+                                    // ending message
+                                    System.out.print(hitResult.substring(1)+"-The "+ (currentPlayer == p1 ?  "American" : "Japanese") +" navy was defeated by the general "+ currentPlayer.name +"!\n");
+
+                                    renderingThread.interrupt(); // wait for the other to close
+                                }
+
+                                // switch players
+                                Board temp = currentPlayer;
+                                currentPlayer = otherPlayer;
+                                otherPlayer = temp;
+                            } else {
+                                currentPlayer.target[1] = x;
+                                currentPlayer.target[0] = y;
+                            }
                             moved = true;
                         }
 
@@ -327,7 +355,7 @@ public class Battleship {
                     System.out.print("\033[?1000l\033[?1006l\033[H\033[2J\033[32m");
 
                     // ending message
-                    System.out.print(hitResult.substring(1)+"-The "+ (currentPlayer == p1 ? "Japanese" : "American") +" navy was defeated by the general "+ otherPlayer.name +"!\n");
+                    System.out.print(hitResult.substring(1)+"-The "+ (currentPlayer == p1 ? "American" : "Japanese") +" navy was defeated by the general "+ currentPlayer.name +"!\n");
 
                     renderingThread.interrupt(); // wait for the other to close
                 }
