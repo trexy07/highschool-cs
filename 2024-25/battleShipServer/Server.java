@@ -226,8 +226,8 @@ public class Server {
                     handleJoin(t);
                 } else if (path.equals("/hit"    )) {
                     handleHit(t);
-                } else if (path.equals("/receive")) {
-                    handleReceive(t);
+                } else if (path.equals("/data")) {
+                    handleData(t);
                 } else                              {
                     System.out.println("no endpoint: " + path);
                     respond(t,404,"no endpoint: " + path);
@@ -426,8 +426,8 @@ public class Server {
             respond(t, 200, hit);
         }
 
-        //https://3bxtl7v5-8000.usw3.devtunnels.ms/receive?id=0
-        public void handleReceive(HttpExchange t) throws IOException{
+        //https://3bxtl7v5-8000.usw3.devtunnels.ms/data?id=0
+        public void handleData(HttpExchange t) throws IOException{
             Map<String, String> args = arguments(t);
 
             // input validation

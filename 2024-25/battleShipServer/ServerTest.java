@@ -41,7 +41,7 @@ class ServerTest {
         System.out.println(res[1]);
 
         // get data
-        res=sendRequest("http://localhost:8000/receive?id=0");
+        res=sendRequest("http://localhost:8000/data?id=0");
         System.out.println(res[1]);
 
         // hit
@@ -69,7 +69,7 @@ class ServerTest {
             res=sendRequest("http://localhost:8000/hit?id=0&player=T&x="+target[0]+"&y="+target[1]);
             System.out.println(res[1]);
         }
-        
+
         // for (int x : Server.rows.get(0)[0].hits ){
         //     System.out.print(x + " ");
         // }

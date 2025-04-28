@@ -45,7 +45,7 @@ public class Board{
     public static final String[]   JAPANESE ={"IJN Akebono","IJN I-19", "IJN Chikuma","IJN Nagato","IJN Akagi"};
     
 
-    public              ArrayList<Integer>    history; // not needed?
+    // public              ArrayList<Integer>    history; // not needed?
     // public        BufferedWriter        save;
     // public        FileOutputStream      save;
     public              DataOutputStream      save;
@@ -56,7 +56,7 @@ public class Board{
         //"this" is used to specify the instance variable, if theres a local of the same name
         this.name  = name;
         this.board = new String[10][10];
-        this.history = new ArrayList<Integer>();
+        // this.history = new ArrayList<Integer>();
 
         for (int i = 0; i < 10; i++){
             for (int j = 0; j < 10; j++){
@@ -93,7 +93,7 @@ public class Board{
     public Board(String name, String locations){ // board constructor for the server to use
         this.name  = name;
         this.board = new String[10][10];
-        this.history = new ArrayList<Integer>();
+        // this.history = new ArrayList<Integer>();
         for (int i = 0; i < 10; i++){
             for (int j = 0; j < 10; j++){
                 this.board[i][j] = "00";
@@ -444,7 +444,7 @@ public class Board{
             
         }
 
-        this.history.add(this.target[0]*10+this.target[1]); // not needed?
+        // this.history.add(this.target[0]*10+this.target[1]); // not needed?
         if (save!=null)
             try{
                 this.save.write(this.target[0]*10+this.target[1]); // save hit to file
@@ -510,7 +510,7 @@ public class Board{
         // System.out.println("\033[38;2;255;215;0m" +"bonjour "+"\033[0m"); //double width
 
         // Board b = new Board("Bob","1780 2230 3560 4490 5440");
-        Board b = new Board("Bob","780230560490440");
+        // Board b = new Board("Bob","780230560490440");
         // Board b = new Board("Bob","110");
         // Board a = new Board("Alice");
 
